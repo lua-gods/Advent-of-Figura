@@ -18,8 +18,26 @@ local function giveHead(name)
                     }
                 }
             }
+        },
+        display = {
+            Name = toJson{
+                {
+                    italic = false,
+                    text = ""
+                },
+                (function()
+                    local t = {}
+                    for i = 1, #name do
+                        t[#t+1] = {
+                            text = name:sub(i,i),
+                            color = "#" .. vectors.rgbToHex(vectors.hsvToRGB(((i - 1) / #name) * (1/3), 0.7, 1))
+                        }
+                    end
+                    return table.unpack(t)
+                end)()
+            }
         }
-    }):gsub('"Id":%[','"Id":[I;'), tonumber(name))
+    }):gsub('"Id":%[','"Id":[I;'))
     main_page:newAction():title(name):item(item):onLeftClick(function ()
         host:setSlot(player:getNbt().SelectedItemSlot, item)
         sounds["entity.item.pickup"]:pos(player:getPos()):play()
