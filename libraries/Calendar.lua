@@ -26,7 +26,7 @@ end
 
 ---@return Day
 function DayManager:today()
-    local day = DATE or client.getDate().day
+    local day = client.getDate().day
     return self.days[day] or self.days.fallback
 end
 
