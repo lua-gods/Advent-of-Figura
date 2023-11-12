@@ -8,7 +8,7 @@ local skulls = {}
 local function signText(pos)
     local blockstate = world.getBlockState(pos)
     if blockstate.id:find("sign") then
-        return tonumber(parseJson(blockstate:getEntityData().front_text.messages[1]).text)
+        return parseJson(blockstate:getEntityData().front_text.messages[1]).text
     end
 end
 
@@ -21,8 +21,8 @@ end
 
 local function chooseDay(blockstate)
     local texture_value = base64.decode(getTextureValue(blockstate:getEntityData()))
-    return texture_value and Calendar:getDay(tonumber(texture_value))
-        or Calendar:getDay(signText(blockstate:getPos() + vec(0, -1, 0)))
+    return texture_value and Calendar:byName(texture_value)
+        or Calendar:byName(signText(blockstate:getPos() + vec(0, -1, 0)))
         or Calendar:today()
 end
 

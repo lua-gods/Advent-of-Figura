@@ -2,32 +2,43 @@ local Day = require("libraries.Day")
 
 ---@class Calendar
 ---@field days table<integer|"fallback", Day>
-local DayManager = {}
-DayManager.__index = DayManager
+local Calendar = {}
+Calendar.__index = Calendar
 
-function DayManager.new()
-    local self = setmetatable({}, DayManager)
+function Calendar.new()
+    local self = setmetatable({}, Calendar)
     self.days = {}
     return self
 end
 
----@param name integer|"fallback"
-function DayManager:newDay(name)
-    local day = Day.new()
-    self.days[name] = day
+---@param name string
+---@param number integer|"fallback"
+function Calendar:newDay(name, number)
+    local day = Day.new(name)
+    self.days[number] = day
     return day
 end
 
----@param name integer|"fallback"
+---@param number integer|"fallback"
 ---@return Day
-function DayManager:getDay(name)
-    return self.days[name]
+function Calendar:byDate(number)
+    return self.days[number] or self.days.fallback
+end
+
+---@param name string
+---@return Day
+function Calendar:byName(name)
+    for _, day in pairs(self.days) do
+        if day.name == name then
+            return day
+        end
+    end
+    return self.days.fallback
 end
 
 ---@return Day
-function DayManager:today()
-    local day = client.getDate().day
-    return self.days[day] or self.days.fallback
+function Calendar:today()
+    return self:byDate(client.getDate().day)
 end
 
-return DayManager.new()
+return Calendar.new()

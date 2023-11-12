@@ -1,5 +1,5 @@
 local Calendar = require("libraries.Calendar")
-local day = Calendar:newDay(-(-({...})[2])) -- registers a new day with this file's name as a number.
+local day = Calendar:newDay("template", 69) -- name and day number.
 
 models.model.days.fallback.cube:setPrimaryTexture("RESOURCE", "missingno") -- do any pre-init stuff here.
 

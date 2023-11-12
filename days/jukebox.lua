@@ -1,5 +1,5 @@
 local Calendar = require("libraries.Calendar")
-local day = Calendar:newDay(-(-({...})[2]))
+local day = Calendar:newDay("jukebox", 2)
 
 local notes = {
     [0] = { 1.26, 1.498, 1, 0.5 },
