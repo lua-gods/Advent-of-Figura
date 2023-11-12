@@ -1,9 +1,11 @@
 ---@class Day
+---@field name string
 local Day = {}
 Day.__index = Day
 
-function Day.new()
+function Day.new(name)
     local self = setmetatable({}, Day)
+    self.name = name
     return self
 end
 

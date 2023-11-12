@@ -1,5 +1,5 @@
-local world_base = models:newPart("skull_world_base"):setParentType("SKULL"):light(15,15)
-local world_part = world_base:newPart("skull_world"):light(15,15)
+local world_base = models:newPart("skull_world_base"):setParentType("SKULL")
+local world_part = world_base:newPart("skull_world")
 
 local facing_rots = {
     north = 0,
