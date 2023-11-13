@@ -3,6 +3,7 @@
 local Day = {}
 Day.__index = Day
 
+---@param name string
 function Day.new(name)
     local self = setmetatable({}, Day)
     self.name = name
