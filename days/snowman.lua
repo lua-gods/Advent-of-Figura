@@ -35,7 +35,10 @@ local function roll(skull)
     local bottom_variant = top_variant == variants.middle and variants.bottom or variants.middle
 
     math.randomseed(skull.pos.x * 73856093 + skull.pos.y * 19349663 + skull.pos.z * 83492791)
-    local top = skull:addPart(top_variant[math.random(1, #top_variant)]):rot(0, rng.float(0, 360), 0)
+    local top = skull:addPart(top_variant[math.random(1, #top_variant)])
+    if type ~= "top" then
+        top:rot(0, rng.float(0, 360), 0)
+    end
     processVariant(top)
 
     local below = world.getBlockState(skull.pos + vec(0,-1,0))
