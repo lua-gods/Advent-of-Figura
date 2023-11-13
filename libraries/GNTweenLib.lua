@@ -501,10 +501,10 @@ events.WORLD_RENDER:register(function()
     local to_unpacked
     if type(ease.from) == "number" then
       if time > ease.duration then
-        pcall(ease.tick,ease.to)
+        pcall(ease.tick,ease.to,time/ease.duration)
         free(id)
       else
-        if not pcall(ease.tick,easing[ease.type](time, ease.from, ease.to - ease.from, ease.duration)) then
+        if not pcall(ease.tick,easing[ease.type](time, ease.from, ease.to - ease.from, ease.duration),time/ease.duration) then
           free(id)
         end
       end
@@ -516,10 +516,10 @@ events.WORLD_RENDER:register(function()
         to_unpacked[i] = easing[ease.type](time, from, to_unpacked[i] - from, ease.duration)
       end
       if time > ease.duration then
-        pcall(ease.tick,ease.to)
+        pcall(ease.tick,ease.to,time/ease.duration)
         free(id)
       else
-        if not pcall(ease.tick,vec(table.unpack(to_unpacked))) then free(id) end
+        if not pcall(ease.tick,vec(table.unpack(to_unpacked)),time/ease.duration) then free(id) end
       end
     end
   end
