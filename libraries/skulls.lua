@@ -42,7 +42,7 @@ function events.WORLD_TICK()
                 skull:init()
                 skull.initialized = true
             end
-            if skull.tick then
+            if skull.initialized and skull.tick then
                 skull:tick(skull)
             end
         else
@@ -54,7 +54,7 @@ end
 
 function events.WORLD_RENDER(delta)
     for _, skull in next, skulls do
-        if not skull.init and skull.render then
+        if skull.initialized and skull.render then
             skull:render(delta)
         end
     end
