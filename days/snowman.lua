@@ -44,12 +44,14 @@ local function roll(skull)
         top:rot(0, rng.float(0, 360), 0)
     end
     processVariant(top)
+    skull.data.top = top
 
     local below = world.getBlockState(skull.pos + vec(0,-1,0))
     if below:isAir() or below.id:find("head") then
         local bottom = skull:addPart(bottom_variant[math.random(1, #bottom_variant)]):rot(0, rng.float(0, 360), 0)
         processVariant(bottom)
         bottom:setPos(bottom:getPos() - vec(0, 8, 0))
+        skull.data.bottom = bottom
     end
 end
 
@@ -88,6 +90,20 @@ function day:init(skull)
 
     if block_above:isAir() and not block_below.id:find("head") then
         hint(skull)
+    end
+end
+
+function day:punch(skull, puncher)
+    if puncher:getHeldItem().id:find("head") then return end
+    local new_rot = skull.data.top:getRot() + vec(0, 360, 0)
+    tween.tweenFunction(skull.data.top:getRot(), new_rot, 1, "inOutCubic", function(x)
+        skull.data.top:rot(x)
+    end)
+    if skull.data.bottom then
+        local new_rot2 = skull.data.bottom:getRot() - vec(0, 360, 0)
+        tween.tweenFunction(skull.data.bottom:getRot(), new_rot2, 1, "inOutCubic", function(x)
+            skull.data.bottom:rot(x)
+        end)
     end
 end
 
