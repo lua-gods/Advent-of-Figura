@@ -21,6 +21,17 @@ function SkullManager:get(pos)
     return self.skulls[tostring(pos:copy():floor())]
 end
 
+---@param filter? function
+function SkullManager:getAll(filter)
+    local skulls = {}
+    for _, skull in next, self.skulls do
+        if not filter or filter(skull) then
+            skulls[#skulls + 1] = skull
+        end
+    end
+    return skulls
+end
+
 ---@param pos Vector3
 ---@return boolean
 function SkullManager:has(pos)
