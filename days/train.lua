@@ -50,15 +50,6 @@ function day:init(skull)
             backwards = true
         }
     end
-    -- print(skullManager.skulls)
-end
-
-local function getTrainSkull(pos)
-    local id = tostring(pos)
-    local skull = skulls[id]
-    if skull and skull.data.isTrain then
-        return skull
-    end
 end
 
 --- every world tick.
@@ -71,16 +62,22 @@ function day:tick(skull)
     local train = skull.data.train
     if train then -- add moving into another head
         train.oldTime = train.time
-        train.time = train.time + 0.05
+        train.time = train.time + 0.15
         if train.time >= 1 then
             train.oldTime = train.oldTime % 1 - 1
             train.time = train.time % 1
             local nextPos = skull.pos + (train.backwards and skull.data.startNode or skull.data.endNode)
-            local newSkull = getTrainSkull(nextPos) or getTrainSkull(nextPos - vec(0, 1, 0))
-            if newSkull then
+            local newSkull = skulls[tostring(nextPos)]
+            if not (newSkull and newSkull.data.isTrain) then
+                nextPos.y = nextPos.y - 1
+                newSkull = skulls[tostring(nextPos)]
+            end
+            if newSkull and not newSkull.data.train then
                 newSkull.data.train = train
                 skull.data.train = nil
-                train.backwards = newSkull.pos + newSkull.data.endNode == skull.pos
+                -- print(newSkull.pos + newSkull.data.endNode, skull.pos, newSkull.pos + newSkull.data.endNode == skull.pos)
+                local connectedEndPos = nextPos + newSkull.data.endNode
+                train.backwards = connectedEndPos == skull.pos or connectedEndPos - vec(0, 1, 0) == skull.pos
             end
         end
     end
