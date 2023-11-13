@@ -1,16 +1,35 @@
 local lib = {}
 
+local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
+---@type table<string, number>
+local char_to_val_cache = {}
+---@param char string
+---@return number
+local function charToValue(char)
+    if not char_to_val_cache[char] then
+        char_to_val_cache[char] = string.find(chars, char, 1, true) - 1
+    end
+    return char_to_val_cache[char]
+end
+
+---@type table<number, string>
+local val_to_char_cache = {}
+---@param val number
+---@return string
+local function valueToChar(val)
+    if not val_to_char_cache[val] then
+        val_to_char_cache[val] = string.sub(chars, val + 1, val + 1)
+    end
+    return val_to_char_cache[val]
+end
+
 ---@param base64 string
 function lib.decode(base64)
     if not base64 then return end
     local result = {}
     local value = 0
     local bits = 0
-    local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-    local function charToValue(char)
-        local index = string.find(chars, char, 1, true)
-        return index and (index - 1)
-    end
     for i = 1, #base64 do
         local char = string.sub(base64, i, i)
         if char == "=" then break end -- ignore padding
@@ -34,10 +53,6 @@ function lib.encode(str)
     local result = {}
     local value = 0
     local bits = 0
-    local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-    local function valueToChar(val)
-        return string.sub(chars, val + 1, val + 1)
-    end
     for i = 1, #str do
         local byte_value = string.byte(str, i, i)
         value = bit32.bor(bit32.lshift(value, 8), byte_value)
@@ -60,5 +75,8 @@ function lib.encode(str)
     end
     return table.concat(result)
 end
+
+assert(lib.decode("SGVsbG8gV29ybGQh") == "Hello World!")
+assert(lib.encode("Hello World!") == "SGVsbG8gV29ybGQh")
 
 return lib
