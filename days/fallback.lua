@@ -9,5 +9,5 @@ end
 
 function day:tick(skull)
     local rainbow = vectors.hsvToRGB(TIME / 40, 1, 1)
-    particles["end_rod"]:pos(skull.pos + vec(0.5, 0.5, 0.5)):velocity(0,1,0):color(rainbow):spawn()
+    particles["end_rod"]:pos(skull.render_pos + vec(0.5, 0.5, 0.5)):velocity(0,1,0):color(rainbow):spawn()
 end

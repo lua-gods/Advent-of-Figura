@@ -12,7 +12,7 @@ end
 
 function day:tick(skull) -- every world tick.
     local rainbow = vectors.hsvToRGB(TIME / 40, 1, 1)
-    particles["end_rod"]:pos(skull.pos + vec(0.5, 0.5, 0.5)):velocity(0,1,0):color(rainbow):spawn() -- skull.pos is the bottom north-west corner of the skull's block.
+    particles["end_rod"]:pos(skull.render_pos + vec(0.5, 0.5, 0.5)):velocity(0,1,0):color(rainbow):spawn() -- skull.render_pos accounts for wall head offsets.
 end
 
 function day:punch(skull) -- when the skull is punched.
