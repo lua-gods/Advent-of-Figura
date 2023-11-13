@@ -76,9 +76,10 @@ function Skull:exit()
     end
 end
 
-function Skull:punch()
+---@param puncher Player
+function Skull:punch(puncher)
     if self.day.punch then
-        self.day:punch(self)
+        self.day:punch(self, puncher)
     end
 end
 

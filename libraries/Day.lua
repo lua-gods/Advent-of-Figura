@@ -24,6 +24,7 @@ function Day:render(skull, delta) end
 function Day:exit(skull) end
 
 ---@param skull Skull
-function Day:punch(skull) end
+---@param puncher Player
+function Day:punch(skull, puncher) end
 
 return Day

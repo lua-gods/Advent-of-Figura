@@ -67,10 +67,10 @@ function SkullManager:init()
         end
     end
 
-    event:on("skull_punched", function (pos)
+    event:on("skull_punched", function (pos, puncher)
         local skull = self:get(pos)
         if skull then
-            skull:punch()
+            skull:punch(puncher)
         end
     end)
 end
