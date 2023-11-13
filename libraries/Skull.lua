@@ -16,6 +16,7 @@ local facing_offsets = {
 ---@class Skull
 ---@field id string
 ---@field pos Vector3
+---@field render_pos Vector3
 ---@field type string
 ---@field rot number
 ---@field initialized boolean
@@ -31,7 +32,8 @@ Skull.__index = Skull
 function Skull.new(blockstate, renderer, day)
     local self = setmetatable({}, Skull)
     self.id = blockstate:getPos():toString()
-    self.pos = blockstate:getPos() - (blockstate.properties.facing and facing_offsets[blockstate.properties.facing] or vec(0,0,0))
+    self.render_pos = blockstate:getPos():sub(blockstate.properties.facing and facing_offsets[blockstate.properties.facing] or vec(0,0,0))
+    self.pos = blockstate:getPos()
     self.rot = (blockstate.properties.rotation or facing_rots[blockstate.properties.facing]) * 22.5
     self.renderer = renderer
     self.day = day
@@ -44,7 +46,7 @@ end
 ---@return ModelPart
 function Skull:addPart(part)
     local copy = deepCopy(part)
-    copy:pos(self.pos*16):rot(0,self.rot,0):visible(true)
+    copy:pos(self.render_pos*16):rot(0,self.rot,0):visible(true)
     self.renderer:addPart(copy)
     return copy
 end
