@@ -1,4 +1,6 @@
 local Calendar = require("libraries.Calendar")
+local manager = require("libraries.SkullManager")
+
 local day = Calendar:newDay("snowman", 3)
 
 local variants = {
@@ -45,18 +47,20 @@ local function roll(skull)
 end
 
 function day:init(skull)
-    roll(skull)
-    skull.data.ripple = event:on("SnowmanRipple", function (pos)
+    skull.data.ripple = function()
         if skull.data.last_ripple == TIME then return end
-        if (skull.pos - pos):length() > 5 then return end
         roll(skull)
         skull.data.last_ripple = TIME
-        event:emit("SnowmanRipple", skull.pos)
-    end)
-    event:emit("SnowmanRipple", skull.pos)
+        for y = -1, 1, 2 do
+            local other_skull = manager:get(skull.pos + vec(0,y,0))
+            if other_skull and other_skull.data.ripple then
+                other_skull.data.ripple()
+            end
+        end
+    end
+    skull.data.ripple()
 end
 
 function day:exit(skull)
-    event:emit("SnowmanRipple", skull.pos)
-    event:remove("SnowmanRipple", skull.data.ripple)
+    skull.data.ripple()
 end
