@@ -3,11 +3,15 @@ local day = Calendar:newDay("fallback", "fallback")
 
 models.model.days.fallback.cube:setPrimaryTexture("RESOURCE", "missingno")
 
+local g1,g2,g3
+
+---@param skull Skull
 function day:init(skull)
     skull:addPart(models.model.days.fallback.cube)
 end
 
-function day:tick(skull)
+---@param skull Skull
+function day:render(skull,delta)
     local rainbow = vectors.hsvToRGB(TIME / 40, 1, 1)
     particles["end_rod"]:pos(skull.render_pos + vec(0.5, 0.5, 0.5)):velocity(0,1,0):color(rainbow):spawn()
 end

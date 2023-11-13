@@ -1,5 +1,7 @@
 local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("jukebox", 2)
+local tween = require("libraries.GNTweenLib")
+local seq = require("libraries.seqLib")
 
 local notes = {
     [0] = { 1.26, 1.498, 1, 0.5 },
@@ -64,6 +66,7 @@ local notes = {
     [660] = { 0.749, 1, 0.5, 0.63 },
 }
 
+---@param skull Skull
 function day:init(skull)
     skull:addPart(models.jukebox)
     skull.data.time = 0
@@ -76,6 +79,7 @@ local function note(time, pos)
         for i = 1, #notes[time] do
             sounds["block.note_block.harp"]:pos(pos + UP):attenuation(1.5):volume(0.7):pitch(notes[time][i]):play()
         end
+        
         return notes[time]
     end
 end
@@ -87,8 +91,9 @@ local function noteColour(pitch)
     local blue = math.max(0.0, math.sin((pitch + (2/3)) * TWO_PI) * 0.65 + 0.35)
     return red, green, blue
 end
-
 local OFFSET = vec(0.5, 0.5, 0.5)
+local anim_time = 0
+---@param skull Skull
 function day:tick(skull)
     local pitches = note(skull.data.time, skull.pos + OFFSET)
     if pitches then
@@ -99,6 +104,20 @@ function day:tick(skull)
                 lifetime = lifetime,
                 max_lifetime = lifetime
             }
+        end
+        if skull.renderer.parts[1] then
+            tween.tweenFunction(
+                anim_time,0.25,0.2,"outBack",function (x)
+                    anim_time = x
+                    skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
+                end,function ()
+                    tween.tweenFunction(.25,0,0.4,"outQuad",function (x)
+                        anim_time = x
+                        skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
+                    end,nil,"JukeboxSing"..skull.id
+                    )
+                end,"JukeboxSing"..skull.id
+            )
         end
     end
 
@@ -115,6 +134,7 @@ function day:tick(skull)
     skull.data.time = (skull.data.time + 1) % 720
 end
 
+---@param skull Skull
 function day:exit(skull)
     for i = #skull.data.particles, 1, -1 do
         skull.data.particles[i].particle:remove()
