@@ -60,7 +60,6 @@ local function isClear(spline)
     for i = 1, #spline do
         local block = world.getBlockState(spline[i].pos)
         if not (block:isAir() or block.id:find("head")) then
-            log(block)
             return false
         end
     end
@@ -93,7 +92,13 @@ local function roll(skull)
     processVariant(bauble)
 
     if skull.data.last then
-        renderSpline(skull, catenary(skull.data.last.pos, skull.pos, 0.4, 1))
+        local i = 0
+        local spline
+        repeat
+            spline = catenary(skull.data.last.pos, skull.pos, 0.4, 1.5 - i * 0.1)
+            i = i + 1
+        until isClear(spline) or i > 10
+        renderSpline(skull, spline)
     end
 end
 
