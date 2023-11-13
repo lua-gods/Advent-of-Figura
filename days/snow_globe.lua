@@ -25,7 +25,7 @@ function day:tick(skull)
     skull.data.snow_part.Snow:pos(0, skull.data.snow_level / 150, 0)
     if skull.data.shake > 0.05 then
         skull.data.shake = skull.data.shake * 0.5
-        skull.data.snow_part:pos(skull.pos:copy():add((math.random()-0.5)*skull.data.shake,0,(math.random()-0.5)*skull.data.shake)*16)
+        skull.data.snow_part:pos(skull.pos:copy():add(rng.vec3().x_z * skull.data.shake) * 16):rot(0, -skull.rot + rng.float(-skull.data.shake * 40, skull.data.shake * 40), 0)
     end
     for i = #skull.data.particles, 1, -1 do
         local particle = skull.data.particles[i]
