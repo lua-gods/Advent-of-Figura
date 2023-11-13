@@ -26,20 +26,24 @@ function day:tick(skull)
                 skull.data.part.lid:uvPixels(0,0)
             end, 4)
         end, 15)
-        tween.tweenFunction(skull.data.shift,vectors.vec3(math.random()-0.5,math.random()-0.5,(math.random()-0.5))*0.25,1,"outSine",function (x,t)
+        tween.tweenFunction(skull.data.shift,vectors.vec3(math.random()-0.5,math.random()-0.5,(math.random()-0.5))*0.25,1,"outSine",function (x)
             skull.data.shift = x
             skull.data.part:setPos((skull.pos + vectors.vec3(x.x,skull.data.height,x.z)) * 16):setRot(0,x.y*180,0)
         end)
         tween.tweenFunction(skull.data.height,0.5,0.2,"outQuart",function (x)
-            skull.data.height = x
+            skull.data.height = x --[[@as number]]
         end,function ()
             tween.tweenFunction(skull.data.height,0,0.5,"outBounce",function (x)
-                skull.data.height = x
+                skull.data.height = x --[[@as number]]
             end)
         end)
         skull.data.fireworks:spawn(skull.render_pos + vec(0.5, 0.5, 0.5), vec(0,1,0), variants[math.random(1, #variants)])
     end
     skull.data.fireworks:tick()
+end
+
+function day:punch(skull)
+    skull.data.fireworks:spawn(skull.render_pos + vec(0.5, 0.5, 0.5), vec(0,1,0), variants[math.random(1, #variants)])
 end
 
 function day:exit(skull)
