@@ -46,7 +46,7 @@ end
 ---@return ModelPart
 function Skull:addPart(part)
     local copy = deepCopy(part)
-    copy:pos(self.render_pos*16):rot(0,self.rot,0):visible(true)
+    copy:pos(self.render_pos*16):rot(0,-self.rot,0):visible(true)
     self.renderer:addPart(copy)
     return copy
 end
