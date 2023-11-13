@@ -70,10 +70,11 @@ function day:init(skull)
     skull.data.particles = {}
 end
 
+local UP = vec(0,1,0)
 local function note(time, pos)
     if notes[time] then
         for i = 1, #notes[time] do
-            sounds["block.note_block.harp"]:pos(pos + vec(0,0,1)):attenuation(1.5):volume(0.7):pitch(notes[time][i]):play()
+            sounds["block.note_block.harp"]:pos(pos + UP):attenuation(1.5):volume(0.7):pitch(notes[time][i]):play()
         end
         return notes[time]
     end
@@ -87,13 +88,14 @@ local function noteColour(pitch)
     return red, green, blue
 end
 
+local OFFSET = vec(0.5, 0.5, 0.5)
 function day:tick(skull)
-    local pitches = note(skull.data.time, skull.pos + vec(0.5, 0.5, 0.5))
+    local pitches = note(skull.data.time, skull.pos + OFFSET)
     if pitches then
         for i = 1, #pitches do
             local lifetime = rng.float(20, 40)
             skull.data.particles[#skull.data.particles+1] = {
-                particle = particles["note"]:pos(skull.pos + vec(0.5, 0.5, 0.5)):velocity(rng.vec3():normalize() * 0.1 + vec(0,0.2,0)):scale(0.5):lifetime(lifetime):color(noteColour(pitches[i])):spawn(),
+                particle = particles["note"]:pos(skull.render_pos + OFFSET):velocity(rng.vec3():normalize() * 0.1 + vec(0,0.2,0)):scale(0.5):lifetime(lifetime):color(noteColour(pitches[i])):spawn(),
                 lifetime = lifetime,
                 max_lifetime = lifetime
             }
@@ -110,10 +112,7 @@ function day:tick(skull)
         end
     end
 
-    skull.data.time = skull.data.time + 1
-    if skull.data.time >= 700 then
-        skull.data.time = 0
-    end
+    skull.data.time = (skull.data.time + 1) % 720
 end
 
 function day:exit(skull)
