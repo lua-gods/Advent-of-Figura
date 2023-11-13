@@ -1,5 +1,5 @@
 ---@class SkullManager
----@field skulls table<string, Skull>
+---@field private skulls table<string, Skull>
 local SkullManager = {}
 SkullManager.__index = SkullManager
 
@@ -57,11 +57,11 @@ function SkullManager:init()
     function events.WORLD_TICK()
         for _, skull in next, self.skulls do
             if world.getBlockState(skull.pos).id ~= "minecraft:air" then
-                if not skull.initialized then
+                if not skull:isActive() then
                     skull:init()
-                    skull.initialized = true
+                    skull:setActive(true)
                 end
-                if skull.initialized and skull.tick then
+                if skull:isActive() and skull.tick then
                     skull:tick()
                 end
             else
@@ -72,7 +72,7 @@ function SkullManager:init()
 
     function events.WORLD_RENDER(delta)
         for _, skull in next, self.skulls do
-            if skull.initialized and skull.render then
+            if skull:isActive() and skull.render then
                 skull:render(delta)
             end
         end

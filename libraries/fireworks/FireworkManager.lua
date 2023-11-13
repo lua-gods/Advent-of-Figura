@@ -1,7 +1,7 @@
 local Firework = require("libraries.fireworks.Firework")
 
 ---@class FireworkManager
----@field fireworks Firework[]
+---@field private fireworks Firework[]
 local FireworkManager = {}
 FireworkManager.__index = FireworkManager
 

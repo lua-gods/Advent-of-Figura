@@ -17,13 +17,11 @@ local facing_offsets = {
 ---@field id string
 ---@field pos Vector3
 ---@field render_pos Vector3
----@field type string
 ---@field rot number
----@field initialized boolean
----@field parts ModelPart[]
 ---@field renderer SkullRenderer
 ---@field day Day
 ---@field data table
+---@field private initialized boolean
 local Skull = {}
 Skull.__index = Skull
 
@@ -37,7 +35,6 @@ function Skull.new(blockstate, renderer, day)
     self.rot = (blockstate.properties.rotation or facing_rots[blockstate.properties.facing]) * 22.5
     self.renderer = renderer
     self.day = day
-    self.parts = {}
     self.data = {}
     return self
 end
@@ -81,6 +78,15 @@ function Skull:punch(puncher)
     if self.day.punch then
         self.day:punch(self, puncher)
     end
+end
+
+function Skull:isActive()
+    return self.initialized
+end
+
+---@param active boolean
+function Skull:setActive(active)
+    self.initialized = active
 end
 
 function Skull:reset()

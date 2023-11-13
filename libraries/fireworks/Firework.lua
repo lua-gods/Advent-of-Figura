@@ -1,9 +1,9 @@
 ---@class Firework
 ---@field pos Vector3
 ---@field vel Vector3
----@field blahaj_blast fun(pos: Vector3)
----@field time integer
----@field ticking boolean
+---@field private ticking boolean
+---@field private blahaj_blast fun(pos: Vector3)
+---@field private time integer
 local Firework = {}
 Firework.__index = Firework
 

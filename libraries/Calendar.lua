@@ -1,7 +1,7 @@
 local Day = require("libraries.Day")
 
 ---@class Calendar
----@field days table<integer|"fallback", Day>
+---@field private days table<integer|"fallback", Day>
 local Calendar = {}
 Calendar.__index = Calendar
 
