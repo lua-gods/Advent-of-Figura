@@ -79,7 +79,6 @@ local function note(time, pos)
         for i = 1, #notes[time] do
             sounds["block.note_block.harp"]:pos(pos + UP):attenuation(1.5):volume(0.7):pitch(notes[time][i]):play()
         end
-        
         return notes[time]
     end
 end
@@ -91,8 +90,27 @@ local function noteColour(pitch)
     local blue = math.max(0.0, math.sin((pitch + (2/3)) * TWO_PI) * 0.65 + 0.35)
     return red, green, blue
 end
+
 local OFFSET = vec(0.5, 0.5, 0.5)
 local anim_time = 0
+
+local function bounce(skull)
+    if skull.renderer.parts[1] then
+        tween.tweenFunction(
+            anim_time,0.25,0.2,"outBack",function (x)
+                anim_time = x --[[@as number]]
+                skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
+            end,function ()
+                tween.tweenFunction(.25,0,0.4,"outQuad",function (x)
+                    anim_time = x --[[@as number]]
+                    skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
+                end,nil,"JukeboxSing"..skull.id
+                )
+            end,"JukeboxSing"..skull.id
+        )
+    end
+end
+
 ---@param skull Skull
 function day:tick(skull)
     local pitches = note(skull.data.time, skull.pos + OFFSET)
@@ -105,20 +123,7 @@ function day:tick(skull)
                 max_lifetime = lifetime
             }
         end
-        if skull.renderer.parts[1] then
-            tween.tweenFunction(
-                anim_time,0.25,0.2,"outBack",function (x)
-                    anim_time = x
-                    skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
-                end,function ()
-                    tween.tweenFunction(.25,0,0.4,"outQuad",function (x)
-                        anim_time = x
-                        skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
-                    end,nil,"JukeboxSing"..skull.id
-                    )
-                end,"JukeboxSing"..skull.id
-            )
-        end
+        bounce(skull)
     end
 
     for i = #skull.data.particles, 1, -1 do
@@ -132,6 +137,16 @@ function day:tick(skull)
     end
 
     skull.data.time = (skull.data.time + 1) % 720
+    return pitches and true or false
+end
+
+function day:punch(skull)
+    bounce(skull)
+    for i = 1, 32 do
+        if day:tick(skull) then
+            break
+        end
+    end
 end
 
 ---@param skull Skull
