@@ -13,8 +13,13 @@ local variants = {
 
 local function tweenIn(part, speed)
     part:scale(0)
+    local rot = part:getRot()
+    local pos = part:getPos()
+    local dir = vec(0, math.floor(TIME + speed) % 2 == 0 and -90 or 90, 0)
     tween.tweenFunction(0, 1, speed, "inOutCirc", function(x)
         part:scale(x--[[@as number]])
+        part:rot(rot + dir * x)
+        part:pos(pos + vec(0, 4, 0) * (1 - x))
     end)
     return part
 end
@@ -51,8 +56,8 @@ end
 function day:init(skull, seed)
     skull.data.parts = {}
     local formation_speed = rng.float(0.7,1.1)
-
-    math.randomseed(skull.pos.x * 73856093 + skull.pos.y * 19349663 + skull.pos.z * 83492791 * (seed or 1))
+    skull.data.seed = seed or 1
+    math.randomseed(skull.pos.x * 73856093 + skull.pos.y * 19349663 + skull.pos.z * 83492791 * skull.data.seed)
     math.random(); math.random(); math.random()
 
     for _ = 1, rng.of(1, 2) do
@@ -87,14 +92,17 @@ function day:tick(skull)
 end
 
 ---@param skull Skull
-function day:punch(skull)
+---@param puncher Player
+function day:punch(skull, puncher)
+    if puncher:getHeldItem().id:find("head") then return end
+
     sounds["block.glass.break"]:pos(skull.render_pos + vec(0.5, 0.5, 0.5)):pitch(rng.float(1.5, 2.5)):volume(0.5):subtitle("Snowflake forms"):play()
 
     for i = 1, #skull.data.parts do
         tweenOut(skull.data.parts[i])
     end
 
-    self:init(skull, math.random())
+    self:init(skull, skull.data.seed + 1)
 end
 
 ---@param skull Skull
