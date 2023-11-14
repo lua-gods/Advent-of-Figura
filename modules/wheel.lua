@@ -5,6 +5,39 @@ local base64 = require("libraries.base64")
 local main_page = action_wheel:newPage()
 action_wheel:setPage(main_page)
 
+local removed = {}
+main_page:newAction():title("§cRemove nearby skulls\n§7(Right click to undo)§r"):item("tnt"):onLeftClick(function ()
+    events.SKULL_RENDER:register(function (delta, block, item, entity, ctx)
+        if block then
+            local pos = block:getPos()
+            if (pos - client:getCameraPos()):length() > 12 then return end
+            removed[#removed + 1] = { pos = pos, block = world.getBlockState(pos):toStateString() }
+            host:sendChatCommand("setblock " .. pos.x .. " " .. pos.y .. " " .. pos.z .. " air")
+            for _ = 1, 20 do
+                particles["smoke"]:pos(pos + vec(0.5,0,0.5) + rng.vec3() * 0.3):velocity(rng.vec3() * 0.2):scale(rng.float(0.4,0.8)):spawn()
+            end
+        end
+    end, "remove_skulls")
+    events.POST_WORLD_RENDER:register(function (delta)
+        events.SKULL_RENDER:remove("remove_skulls")
+        events.POST_WORLD_RENDER:remove("remove_skulls")
+    end, "remove_skulls")
+end):onRightClick(function ()
+    for i = 1, #removed do
+        local block = removed[i]
+        local command = "setblock " .. block.pos.x .. " " .. block.pos.y .. " " .. block.pos.z .. " " .. block.block
+        if #command > 255 then
+            log("Command too long, could not restore")
+        else
+            host:sendChatCommand(command)
+        end
+        for _ = 1, 20 do
+            particles["end_rod"]:pos(block.pos + vec(0.5,0,0.5) + rng.vec3() * 0.2):velocity(rng.vec3() * 0.1):color(vectors.hsvToRGB(rng.float(0,1),0.4,1)):lifetime(rng.float(10,20)):scale(0.3):spawn()
+        end
+    end
+    removed = {}
+end)
+
 local function giveHead(name)
     local item = world.newItem("player_head" .. (toJson{
         SkullOwner = {
