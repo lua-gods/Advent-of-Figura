@@ -7,16 +7,17 @@ local facing_rots = {
     west = 12
 }
 local facing_offsets = {
-    south = vec(0,-0.25,0.25),
-    east = vec(0.25,-0.25,0),
-    north = vec(0,-0.25,-0.25),
-    west = vec(-0.25,-0.25,0)
+    south = vec(0,0.25,-0.25),
+    east = vec(-0.25,0.25,0),
+    north = vec(0,0.25,0.25),
+    west = vec(0.25,0.25,0)
 }
 
 ---@class Skull
 ---@field id string
 ---@field pos Vector3
----@field render_pos Vector3
+---@field offset Vector3
+---@field render_pos Vector3 pos + offset
 ---@field rot number
 ---@field renderer SkullRenderer
 ---@field day Day
@@ -30,7 +31,8 @@ Skull.__index = Skull
 function Skull.new(blockstate, renderer, day)
     local self = setmetatable({}, Skull)
     self.id = blockstate:getPos():toString()
-    self.render_pos = blockstate:getPos():sub(blockstate.properties.facing and facing_offsets[blockstate.properties.facing] or vec(0,0,0))
+    self.offset = blockstate.properties.facing and facing_offsets[blockstate.properties.facing] or vec(0,0,0)
+    self.render_pos = blockstate:getPos():add(self.offset)
     self.pos = blockstate:getPos()
     self.rot = (blockstate.properties.rotation or facing_rots[blockstate.properties.facing]) * 22.5
     self.renderer = renderer
@@ -39,11 +41,15 @@ function Skull.new(blockstate, renderer, day)
     return self
 end
 
+---Adds the given part to the skull. The part will be removed when the skull resets.
 ---@param part ModelPart
+---@param pos? Vector3 world-relative. Defaults to skull.render_pos. Multiplied by 16.
+---@param rot? Vector3 defaults to vec(0, -skull.rot, 0)
 ---@return ModelPart
-function Skull:addPart(part)
+function Skull:addPart(part, pos, rot)
     local copy = deepCopy(part)
-    copy:pos(self.render_pos*16):rot(0,-self.rot,0):visible(true)
+    copy:pos((pos or self.render_pos) * 16):rot(rot or vec(0, -self.rot, 0)):visible(true)
+    copy:light(world.getBlockLightLevel(pos or self.render_pos))
     self.renderer:addPart(copy)
     return copy
 end
