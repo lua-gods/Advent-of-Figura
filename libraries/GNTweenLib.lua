@@ -502,8 +502,13 @@ function tween.tweenFunction(from, to, duration, ease, tick, finish, id)
     compose.id = id
     eases[id] = compose
   else
-    local next_free = #eases+1
-    eases[next_free] = compose
+    for i = 1, #eases+1, 1 do
+      if not eases[i] then
+        compose.id = i
+        eases[i] = compose
+        break
+      end
+    end
   end
 end
 
