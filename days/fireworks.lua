@@ -26,11 +26,11 @@ local function animation(skull)
             skull.data.height = x --[[@as number]]
         end,nil,"fireworks"..skull.id)
     end,"fireworks"..skull.id)
-    tween.tweenFunction(skull.data.squish,0.7,0.05,"outSine",function (x) -- squish 
+    tween.tweenFunction(skull.data.squish,0.9,0.05,"outSine",function (x) -- squish 
         skull.data.squish = x
         skull.data.part:setScale(1/x,x,1/x)
     end,function ()
-        tween.tweenFunction(skull.data.squish,1.4,0.2,"inOutQuad",function (x) -- squish 
+        tween.tweenFunction(skull.data.squish,1.1,0.2,"inOutQuad",function (x) -- squish 
             skull.data.squish = x
             skull.data.part:setScale(1/x,x,1/x)
         end,function ()
