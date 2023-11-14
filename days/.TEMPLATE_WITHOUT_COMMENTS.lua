@@ -12,7 +12,8 @@ function day:tick(skull)
 end
 
 ---@param skull Skull
-function day:punch(skull)
+---@param puncher Player
+function day:punch(skull,puncher)
 
 end
 

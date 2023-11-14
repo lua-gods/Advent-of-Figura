@@ -391,46 +391,16 @@ end
 
 local easing = {
   linear = linear,
-  inQuad = inQuad,
-  outQuad = outQuad,
-  inOutQuad = inOutQuad,
-  outInQuad = outInQuad,
-  inCubic = inCubic,
-  outCubic = outCubic,
-  inOutCubic = inOutCubic,
-  outInCubic = outInCubic,
-  inQuart = inQuart,
-  outQuart = outQuart,
-  inOutQuart = inOutQuart,
-  outInQuart = outInQuart,
-  inQuint = inQuint,
-  outQuint = outQuint,
-  inOutQuint = inOutQuint,
-  outInQuint = outInQuint,
-  inSine = inSine,
-  outSine = outSine,
-  inOutSine = inOutSine,
-  outInSine = outInSine,
-  inExpo = inExpo,
-  outExpo = outExpo,
-  inOutExpo = inOutExpo,
-  outInExpo = outInExpo,
-  inCirc = inCirc,
-  outCirc = outCirc,
-  inOutCirc = inOutCirc,
-  outInCirc = outInCirc,
-  inElastic = inElastic,
-  outElastic = outElastic,
-  inOutElastic = inOutElastic,
-  outInElastic = outInElastic,
-  inBack = inBack,
-  outBack = outBack,
-  inOutBack = inOutBack,
-  outInBack = outInBack,
-  inBounce = inBounce,
-  outBounce = outBounce,
-  inOutBounce = inOutBounce,
-  outInBounce = outInBounce
+  inQuad = inQuad,      outQuad = outQuad,       inOutQuad = inOutQuad,      outInQuad = outInQuad,
+  inCubic = inCubic,    outCubic = outCubic,     inOutCubic = inOutCubic,    outInCubic = outInCubic,
+  inQuart = inQuart,    outQuart = outQuart,     inOutQuart = inOutQuart,    outInQuart = outInQuart,
+  inQuint = inQuint,    outQuint = outQuint,     inOutQuint = inOutQuint,    outInQuint = outInQuint,
+  inSine = inSine,      outSine = outSine,       inOutSine = inOutSine,      outInSine = outInSine,
+  inExpo = inExpo,      outExpo = outExpo,       inOutExpo = inOutExpo,      outInExpo = outInExpo,
+  inCirc = inCirc,      outCirc = outCirc,       inOutCirc = inOutCirc,      outInCirc = outInCirc,
+  inElastic = inElastic,outElastic = outElastic, inOutElastic = inOutElastic,outInElastic = outInElastic,
+  inBack = inBack,      outBack = outBack,       inOutBack = inOutBack,      outInBack = outInBack,
+  inBounce = inBounce,  outBounce = outBounce,   inOutBounce = inOutBounce,  outInBounce = outInBounce
 }
 
 local eases = {}
@@ -480,6 +450,7 @@ local eases = {}
 
 local tween = {}
 tween.ease = easing
+local queue_free = {}
 
 ---@param from number|Vector2|Vector3|Vector4
 ---@param to number|Vector2|Vector3|Vector4
@@ -513,11 +484,7 @@ function tween.tweenFunction(from, to, duration, ease, tick, finish, id)
 end
 
 local function free(id)
-  local ease = eases[id]
-  if ease then
-    eases[id] = nil
-    if ease.on_finish then ease.on_finish() end
-  end
+  queue_free[#queue_free+1] = id
 end
 
 events.WORLD_RENDER:register(function()
@@ -549,6 +516,16 @@ events.WORLD_RENDER:register(function()
         if not pcall(ease.tick,vec(table.unpack(to_unpacked)),time/ease.duration) then free(id) end
       end
     end
+  end
+  if #queue_free > 0 then
+    for _, id in pairs(queue_free) do
+      local ease = eases[id]
+      if ease then
+        eases[id] = nil
+        if ease.on_finish then ease.on_finish() end
+      end
+    end
+    queue_free = {}
   end
 end)
 return tween
