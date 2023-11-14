@@ -15,7 +15,7 @@ end
 
 ---@param skull Skull
 local function animation(skull)
-    tween.tweenFunction(skull.data.shift,vectors.vec3(math.random()-0.5,math.random()-0.5,(math.random()-0.5))*0.25,1,"outSine",function (x)
+    tween.tweenFunction(skull.data.shift,rng.vec3()*0.25,1,"outSine",function (x)
         skull.data.shift = x
         skull.data.part:setPos((skull.pos + vectors.vec3(x.x,skull.data.height,x.z)) * 16):setRot(0,x.y*180,0)
     end)
@@ -72,7 +72,8 @@ function day:tick(skull)
     skull.data.fireworks:tick()
 end
 
-function day:punch(skull)
+function day:punch(skull, puncher)
+    if puncher:getHeldItem().id:find("head") then return end
     launch(skull)
 end
 

@@ -9,7 +9,8 @@ function day:init(skull)
     skull.data.shake = 0
 end
 
-function day:punch(skull)
+function day:punch(skull, puncher)
+    if puncher:getHeldItem().id:find("head") then return end
     if skull.data.snow_level > 1 then
         sounds["block.powder_snow.place"]:pos(skull.pos + vec(0.5,0.5,0.5)):pitch(rng.float(0.8,1.2)):subtitle("Snow poofs"):play()
         for i = 1, 20 do

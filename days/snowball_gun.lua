@@ -83,7 +83,7 @@ function day:tick(skull)
         if (player:getPos() - skull.pos):lengthSquared() < ACTIVATION_RANGE then
             local _, target_pos = player:getTargetedBlock()
             aim(skull, target_pos)
-            shoot(skull, target_pos)
+            shoot(skull)
             break
         end
     end
