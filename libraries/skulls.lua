@@ -23,6 +23,7 @@ local function chooseDay(blockstate)
     return texture_value and Calendar:byName(texture_value)
         or Calendar:byName(signText(blockstate:getPos() + vec(0, -1, 0)))
         or Calendar:today()
+        or Calendar:getFallback()
 end
 
 function events.SKULL_RENDER(_, blockstate)

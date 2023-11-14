@@ -20,19 +20,22 @@ function Calendar:newDay(name, number)
 end
 
 ---@param number integer|"fallback"
----@return Day
+---@return Day?
 function Calendar:byDate(number)
-    return self.days[number] or self.days.fallback
+    return self.days[number]
 end
 
 ---@param name string
----@return Day
+---@return Day?
 function Calendar:byName(name)
     for _, day in pairs(self.days) do
         if day.name == name then
             return day
         end
     end
+end
+
+function Calendar:getFallback()
     return self.days.fallback
 end
 
