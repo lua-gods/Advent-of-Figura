@@ -20,6 +20,7 @@ local facing_offsets = {
 ---@field render_pos Vector3 pos + offset
 ---@field rot number
 ---@field renderer SkullRenderer
+---@field is_wall_head boolean
 ---@field day Day
 ---@field data table
 ---@field private initialized boolean
@@ -31,7 +32,8 @@ Skull.__index = Skull
 function Skull.new(blockstate, renderer, day)
     local self = setmetatable({}, Skull)
     self.id = blockstate:getPos():toString()
-    self.offset = blockstate.properties.facing and facing_offsets[blockstate.properties.facing] or vec(0,0,0)
+    self.is_wall_head = not not blockstate.properties.facing
+    self.offset = self.is_wall_head and facing_offsets[blockstate.properties.facing] or vec(0,0,0)
     self.render_pos = blockstate:getPos():add(self.offset)
     self.pos = blockstate:getPos()
     self.rot = (blockstate.properties.rotation or facing_rots[blockstate.properties.facing]) * 22.5
