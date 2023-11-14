@@ -450,6 +450,7 @@ local eases = {}
 
 local tween = {}
 tween.ease = easing
+local queue_free = {}
 
 ---@param from number|Vector2|Vector3|Vector4
 ---@param to number|Vector2|Vector3|Vector4
@@ -483,11 +484,7 @@ function tween.tweenFunction(from, to, duration, ease, tick, finish, id)
 end
 
 local function free(id)
-  local ease = eases[id]
-  if ease then
-    eases[id] = nil
-    if ease.on_finish then ease.on_finish() end
-  end
+  queue_free[#queue_free+1] = id
 end
 
 events.WORLD_RENDER:register(function()
@@ -519,6 +516,16 @@ events.WORLD_RENDER:register(function()
         if not pcall(ease.tick,vec(table.unpack(to_unpacked)),time/ease.duration) then free(id) end
       end
     end
+  end
+  if #queue_free > 0 then
+    for _, id in pairs(queue_free) do
+      local ease = eases[id]
+      if ease then
+        eases[id] = nil
+        if ease.on_finish then ease.on_finish() end
+      end
+    end
+    queue_free = {}
   end
 end)
 return tween
