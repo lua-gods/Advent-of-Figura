@@ -500,20 +500,19 @@ function tween.tweenFunction(from, to, duration, ease, tick, finish, id)
   }
   if id then
     compose.id = id
-    for key, compare in pairs(eases) do
-      if compare.id == id then
-        eases[key] = compose
-        return
-      end
-    end
+    eases[id] = compose
+  else
+    local next_free = #eases+1
+    eases[next_free] = compose
   end
-  table.insert(eases, compose)
 end
 
 local function free(id)
   local ease = eases[id]
-  table.remove(eases, id)
-  if ease.on_finish then ease.on_finish() end
+  if ease then
+    eases[id] = nil
+    if ease.on_finish then ease.on_finish() end
+  end
 end
 
 events.WORLD_RENDER:register(function()
