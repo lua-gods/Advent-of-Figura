@@ -49,7 +49,7 @@ end
 function Skull:addPart(part, pos, rot)
     local copy = deepCopy(part)
     copy:pos((pos or self.render_pos) * 16):rot(rot or vec(0, -self.rot, 0)):visible(true)
-    copy:light(world.getBlockLightLevel(pos or self.render_pos))
+    copy:light(world.getBlockLightLevel(pos or self.pos), world.getSkyLightLevel(pos or self.pos))
     self.renderer:addPart(copy)
     return copy
 end
