@@ -3,8 +3,12 @@ local manager = require("libraries.SkullManager")
 local tween = require("libraries.GNTweenLib")
 
 ---@class Day.Baubles: Day
----@field last Skull
+---@field skulls Skull[]
+---@field needs_pairing boolean
+---@field last_pair integer
 local day = Calendar:newDay("baubles", 4)
+day.skulls = {}
+day.last_pair = 0
 
 local variants = {
     bauble = models.baubles.Bauble:getChildren(),
@@ -74,9 +78,7 @@ local function renderSpline(skull, spline)
     if isClear(spline) then
         for i = 1, #spline do
             local point = spline[i]
-            local vine = skull:addPart(variants.vine[math.random(1, #variants.vine)])
-            vine:setPos(point.pos * 16)
-            vine:setRot(dirToAngle((point.pos - spline[i - 1].pos):normalize()))
+            local vine = skull:addPart(variants.vine[math.random(1, #variants.vine)], (point.pos + skull.offset), dirToAngle((point.pos - spline[i - 1].pos):normalize()))
             processVariant(vine)
         end
     end
@@ -102,13 +104,48 @@ local function roll(skull)
     end
 end
 
+local function shuffle(tbl)
+    table.sort(tbl, function (a, b)
+        return (a.pos.x + a.pos.y + a.pos.z) > (b.pos.x + b.pos.y + b.pos.z)
+    end)
+    math.randomseed(0)
+    for i = #tbl, 2, -1 do
+        local j = math.random(i)
+    end
+end
+
+function day:pairSkulls()
+    shuffle(self.skulls)
+    local connected = {}
+    for i = 1, #self.skulls do
+        local skull = self.skulls[i]
+        local other_skull
+        local j = 0
+        repeat
+            j = j + 1
+            other_skull = self.skulls[math.random(1, #self.skulls)]
+        until (not connected[other_skull] and skull ~= other_skull) or j > 10
+        connected[other_skull] = true
+        skull.data.last = other_skull
+        roll(skull)
+    end
+end
+
+function day:addSkull(skull)
+    self.skulls[#self.skulls + 1] = skull
+    self.needs_pairing = true
+end
+
 function day:init(skull)
-    skull.data.last = self.last
-    roll(skull)
-    self.last = skull
+    self:addSkull(skull)
 end
 
 function day:tick(skull)
+    if self.needs_pairing and TIME > self.last_pair then
+        self:pairSkulls()
+        self.last_pair = TIME
+        self.needs_pairing = false
+    end
     if skull.data.last then
         local diff = (skull.data.last.render_pos + vec(0.5,0.5,0.5)) - (skull.render_pos + vec(0.5,0.5,0.5))
         local dir = diff:copy():normalize()
