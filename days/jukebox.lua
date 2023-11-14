@@ -1,7 +1,11 @@
 local Calendar = require("libraries.Calendar")
-local day = Calendar:newDay("jukebox", 2)
 local tween = require("libraries.GNTweenLib")
 local seq = require("libraries.seqLib")
+
+---@class Day.Jukebox: Day
+---@field main Skull
+---@field time integer
+local day = Calendar:newDay("jukebox", 2)
 
 local notes = {
     [0] = { 1.26, 1.498, 1, 0.5 },
@@ -68,8 +72,12 @@ local notes = {
 
 ---@param skull Skull
 function day:init(skull)
+    if not self.main then
+        self.time = 0
+        self.main = skull
+    end
     skull:addPart(models.jukebox)
-    skull.data.time = 0
+    skull.data.anim_time = 0
     skull.data.particles = {}
 end
 
@@ -92,28 +100,24 @@ local function noteColour(pitch)
 end
 
 local OFFSET = vec(0.5, 0.5, 0.5)
-local anim_time = 0
 
 local function bounce(skull)
     if skull.renderer.parts[1] then
-        tween.tweenFunction(
-            anim_time,0.25,0.2,"outBack",function (x)
-                anim_time = x --[[@as number]]
+        tween.tweenFunction(skull.data.anim_time,0.25,0.2,"outBack",function(x)
+            skull.data.anim_time = x --[[@as number]]
+            skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
+        end,function()
+            tween.tweenFunction(.25,0,0.4,"outQuad",function(x)
+                skull.data.anim_time = x --[[@as number]]
                 skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
-            end,function ()
-                tween.tweenFunction(.25,0,0.4,"outQuad",function (x)
-                    anim_time = x --[[@as number]]
-                    skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
-                end,nil,"JukeboxSing"..skull.id
-                )
-            end,"JukeboxSing"..skull.id
-        )
+            end,nil,"JukeboxSing"..skull.id)
+        end,"JukeboxSing"..skull.id)
     end
 end
 
 ---@param skull Skull
 function day:tick(skull)
-    local pitches = note(skull.data.time, skull.pos + OFFSET)
+    local pitches = note(self.time, skull.pos + OFFSET)
     if pitches then
         for i = 1, #pitches do
             local lifetime = rng.float(20, 40)
@@ -136,11 +140,17 @@ function day:tick(skull)
         end
     end
 
-    skull.data.time = (skull.data.time + 1) % 720
+    if self.main == skull then
+        self.time = (self.time + 1) % 720
+    end
+    if self.main and not self.main:isActive() then
+        self.main = skull
+    end
     return pitches and true or false
 end
 
-function day:punch(skull)
+function day:punch(skull, puncher)
+    if puncher:getHeldItem().id:find("head") then return end
     bounce(skull)
     for i = 1, 32 do
         if day:tick(skull) then
