@@ -1,6 +1,5 @@
 local Calendar = require("libraries.Calendar")
 local tween = require("libraries.GNTweenLib")
-local seq = require("libraries.seqLib")
 
 ---@class Day.Jukebox: Day
 ---@field main Skull
