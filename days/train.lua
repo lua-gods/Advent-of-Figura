@@ -98,8 +98,8 @@ function day:tick(skull)
       -- spawn train if it doesnt exist on track already
       if not findTrainNearby(skull) then
          skull.data.train = {
-            oldTime = 0,
-            time = 0,
+            oldTime = 0.5,
+            time = 0.5,
             backwards = false,
             speed = trainSpeed
          }
@@ -109,23 +109,37 @@ function day:tick(skull)
    local train = skull.data.train
    if train then
       train.oldTime = train.time
-      train.time = train.time + train.speed
-      train.speed = math.lerp(train.speed, trainSpeed, 0.1)
+      local speed = train.speed
+      train.speed = math.lerp(train.speed, trainSpeed, 0.4)
+      -- adjust speed for some rail types
+      if skull.data.trackType == 'rotated' then
+         speed = speed * 1.6
+      elseif skull.data.trackType == 'vertical' then
+         speed = speed * (train.backwards and 1.2 or 0.8)
+      end
+      -- add speed
+      train.time = train.time + speed
+      -- try to move to next rail
       if train.time >= 1 then
-         train.oldTime = train.oldTime % 1 - 1
+         train.oldTime = 0
          train.time = train.time % 1
          local newSkull, backwards = getNextTrack(skull, train.backwards)
-         if newSkull then
+         if newSkull and not newSkull.data.train then
             train.backwards = backwards
             newSkull.data.train = train
             skull.data.train = nil
-         else
-            -- turn backwards
-            newSkull, backwards = getNextTrack(skull, not train.backwards)
-            if newSkull then
-               train.oldTime = 0
-               train.time = 0
+         end
+      elseif train.time >= 0.5 then -- try turning backwards
+         local newSkull = getNextTrack(skull, train.backwards)
+         if not newSkull or newSkull.data.train then
+            newSkull = getNextTrack(skull, not train.backwards)
+            if not newSkull or newSkull.data.train then -- stop moving
                train.speed = 0
+               train.time = 0.5
+            else -- turn backwards
+               train.speed = -0.05
+               train.time = 0.5
+               train.oldTime = 0.5
                train.backwards = not train.backwards
             end
          end
@@ -148,7 +162,6 @@ function day:render(skull, delta)
    if train then
       trainModel:setVisible(true)
       local trainTime = math.lerp(train.oldTime, train.time, delta)
-      skull.data.model:setColor(0.5, 0.5, 0.5)
       local backwards = train.backwards
       local rotOffset = skull.data.rotOffset
       if skull.data.trackType == 'straight' then
@@ -157,7 +170,6 @@ function day:render(skull, delta)
       elseif skull.data.trackType == 'rotated' then
          local rot = trainTime * 90
          trainModel:setRot(0, rotOffset, 0)
-         trainModel.start:setPos(0, 0, 0)
          if backwards then
             trainModel:setPos(skull.pos * 16 + vec(16, 0, 0) * matrices.rotation3(0, rotOffset, 0))
             trainModel.start:setPivot(-8, 0, 8)
@@ -168,11 +180,17 @@ function day:render(skull, delta)
             trainModel.start:setRot(0, -rot, 0)
          end
       elseif skull.data.trackType == 'vertical' then
-
+         trainTime = trainTime * 16
+         if backwards then
+            trainModel.start:setRot(-45, 0, 0)
+            trainModel.start:setPos(0, 14 - trainTime, - 2 - trainTime)
+         else
+            trainModel.start:setRot(45, 180, 0)
+            trainModel.start:setPos(0, trainTime, trainTime - 16)
+         end
       end
    else
       trainModel:setVisible(false)
-      skull.data.model:setColor(1, 1, 1)
    end
 end
 
