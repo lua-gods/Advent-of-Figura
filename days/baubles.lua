@@ -107,7 +107,7 @@ end
 
 local function shuffle(tbl)
     table.sort(tbl, function (a, b)
-        return (a.pos.x + a.pos.y + a.pos.z) > (b.pos.x + b.pos.y + b.pos.z)
+        return a.pos:lengthSquared() > b.pos:lengthSquared()
     end)
 end
 
