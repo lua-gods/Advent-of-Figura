@@ -78,7 +78,8 @@ local function renderSpline(skull, spline)
     if isClear(spline) then
         for i = 1, #spline do
             local point = spline[i]
-            local vine = skull:addPart(variants.vine[math.random(1, #variants.vine)], (point.pos + skull.offset), dirToAngle((point.pos - spline[i - 1].pos):normalize()))
+            local offset = math.lerp(skull.data.last.offset, skull.offset, i / #spline)
+            local vine = skull:addPart(variants.vine[math.random(1, #variants.vine)], (point.pos + offset), dirToAngle((point.pos - spline[i - 1].pos):normalize()))
             processVariant(vine)
         end
     end
@@ -108,10 +109,6 @@ local function shuffle(tbl)
     table.sort(tbl, function (a, b)
         return (a.pos.x + a.pos.y + a.pos.z) > (b.pos.x + b.pos.y + b.pos.z)
     end)
-    math.randomseed(0)
-    for i = #tbl, 2, -1 do
-        local j = math.random(i)
-    end
 end
 
 function day:pairSkulls()
@@ -146,15 +143,15 @@ function day:tick(skull)
         self.last_pair = TIME
         self.needs_pairing = false
     end
-    if skull.data.last then
-        local diff = (skull.data.last.render_pos + vec(0.5,0.5,0.5)) - (skull.render_pos + vec(0.5,0.5,0.5))
-        local dir = diff:copy():normalize()
-        local max = diff:length()
-        for i = 0, max, 8 do
-            local point = skull.render_pos + vec(0.5,0.5,0.5) + dir * math.min(max, i + (TIME / 4) % 8)
-            particles["end_rod"]:pos(point):gravity():scale(0.5):lifetime(10):spawn()
-        end
-    end
+    -- if skull.data.last then
+    --     local diff = (skull.data.last.render_pos + vec(0.5,0.5,0.5)) - (skull.render_pos + vec(0.5,0.5,0.5))
+    --     local dir = diff:copy():normalize()
+    --     local max = diff:length()
+    --     for i = 0, max, 8 do
+    --         local point = skull.render_pos + vec(0.5,0.5,0.5) + dir * math.min(max, i + (TIME / 4) % 8)
+    --         particles["end_rod"]:pos(point):gravity():scale(0.5):lifetime(10):spawn()
+    --     end
+    -- end
 end
 
 function day:punch(skull, puncher)
@@ -162,5 +159,11 @@ function day:punch(skull, puncher)
 end
 
 function day:exit(skull)
-
+    for i = 1, #self.skulls do
+        if self.skulls[i] == skull then
+            table.remove(self.skulls, i)
+            break
+        end
+    end
+    self.needs_pairing = true
 end
