@@ -3,7 +3,7 @@ local day = Calendar:newDay("train")
 
 local skullManager = require("libraries.SkullManager")
 
-local trainSpeed = 0.1
+local trainSpeed = 0.5
 
 local facingToRot = {
    west = -90,
@@ -91,6 +91,7 @@ end
 --- every world tick.
 ---@param skull Skull
 function day:tick(skull)
+   if TIME % 4 >= 1 then return end
    -- spawn train
    skull.data.spawnTrainTime = math.max(skull.data.spawnTrainTime - 1, 0)
    if skull.data.spawnTrainTime == 1 then
@@ -101,13 +102,16 @@ function day:tick(skull)
             oldTime = 0.5,
             time = 0.5,
             backwards = false,
-            speed = trainSpeed
+            speed = trainSpeed,
+            tick = 0
          }
       end
    end
    -- move into another skull
    local train = skull.data.train
-   if train then
+   if train and train.tick ~= TIME then
+      train.tick = TIME
+      -- update time and speed
       train.oldTime = train.time
       local speed = train.speed
       train.speed = math.lerp(train.speed, trainSpeed, 0.4)
@@ -117,11 +121,10 @@ function day:tick(skull)
       elseif skull.data.trackType == 'vertical' then
          speed = speed * (train.backwards and 1.2 or 0.8)
       end
-      -- add speed
       train.time = train.time + speed
       -- try to move to next rail
       if train.time >= 1 then
-         train.oldTime = 0
+         train.oldTime = train.oldTime % 1 - 1
          train.time = train.time % 1
          local newSkull, backwards = getNextTrack(skull, train.backwards)
          if newSkull and not newSkull.data.train then
@@ -153,43 +156,69 @@ function day:punch(skull) -- i dont think i will need it
    -- log("ouch")
 end
 
+local function renderTrain(skull, time, trainModel, backwards)
+   local rotOffset = skull.data.rotOffset
+   -- time = time / 16 * 17.6
+   if skull.data.trackType == 'straight' then
+      trainModel:setPos(skull.pos * 16)
+      if player:isCrouching() then
+         print(math.floor(time * 100 * 16) / 100)
+      end
+      trainModel.start:setPos(0, 0, time * -16)
+      trainModel:setRot(0, rotOffset + (backwards and 180 or 0), 0)
+      trainModel.start:setRot(0, 0, 0)
+      trainModel.start:setPivot(0, 0, 0)
+   elseif skull.data.trackType == 'rotated' then
+      trainModel.start:setPos(0, 0, 0)
+      local rot = time * 90
+      trainModel:setRot(0, rotOffset, 0)
+      trainModel.start:setPos(0, 0, 0)
+      if backwards then
+         trainModel:setPos(skull.pos * 16 + vec(16, 0, 0) * matrices.rotation3(0, rotOffset, 0))
+         trainModel.start:setPivot(-8, 0, 8)
+         trainModel.start:setRot(0, rot + 90, 0)
+      else
+         trainModel:setPos(skull.pos * 16)
+         trainModel.start:setPivot(8, 0, 8)
+         trainModel.start:setRot(0, -rot, 0)
+      end
+   elseif skull.data.trackType == 'vertical' then
+      time = time * 16
+      trainModel:setPos(skull.pos * 16)
+      trainModel:setRot(0, rotOffset + 180, 0)
+      trainModel.start:setPivot(0, 0, 0)
+      if backwards then
+         trainModel.start:setRot(-45, 0, 0)
+         trainModel.start:setPos(0, 12 - time, 4 - time)
+      else
+         trainModel.start:setRot(45, 180, 0)
+         trainModel.start:setPos(0, 4 + time, time - 4)
+      end
+   end
+end
+
 ---@param skull Skull
 ---@param delta number
 function day:render(skull, delta)
+   delta = delta / 4 + ((TIME - 1) % 4) / 4
    -- render train
    local train = skull.data.train
    local trainModel = skull.data.trainModel
    if train then
       trainModel:setVisible(true)
-      local trainTime = math.lerp(train.oldTime, train.time, delta)
-      local backwards = train.backwards
-      local rotOffset = skull.data.rotOffset
-      if skull.data.trackType == 'straight' then
-         trainModel.start:setPos(0, 0, trainTime * -16)
-         trainModel:setRot(0, rotOffset + (backwards and 180 or 0), 0)
-      elseif skull.data.trackType == 'rotated' then
-         local rot = trainTime * 90
-         trainModel:setRot(0, rotOffset, 0)
-         if backwards then
-            trainModel:setPos(skull.pos * 16 + vec(16, 0, 0) * matrices.rotation3(0, rotOffset, 0))
-            trainModel.start:setPivot(-8, 0, 8)
-            trainModel.start:setRot(0, rot + 90, 0)
+      local time = math.lerp(train.oldTime, train.time, delta)
+      if time < 0 then
+         local previousSkull, backwards = getNextTrack(skull, not train.backwards)
+         if previousSkull then
+            renderTrain(previousSkull, time + 1, trainModel, not backwards)
          else
-            trainModel:setPos(skull.pos * 16)
-            trainModel.start:setPivot(8, 0, 8)
-            trainModel.start:setRot(0, -rot, 0)
+            renderTrain(skull, time, trainModel, train.backwards)
          end
-      elseif skull.data.trackType == 'vertical' then
-         trainTime = trainTime * 16
-         if backwards then
-            trainModel.start:setRot(-45, 0, 0)
-            trainModel.start:setPos(0, 14 - trainTime, - 2 - trainTime)
-         else
-            trainModel.start:setRot(45, 180, 0)
-            trainModel.start:setPos(0, trainTime, trainTime - 16)
-         end
+      else
+         renderTrain(skull, time, trainModel, train.backwards)
       end
    else
+      skull.data.model:setColor()
       trainModel:setVisible(false)
    end
 end
