@@ -33,3 +33,17 @@ function events.SKULL_RENDER(_, blockstate)
         end
     end
 end
+
+function events.WORLD_TICK()
+    local active = {}
+
+    for _, skull in next, manager:getAll() do
+        local day = skull.day
+        active[day] = active[day] or {}
+        active[day][#active[day] + 1] = skull
+    end
+    
+    for day, skulls in next, active do
+        day:globalTick(skulls)
+    end
+end

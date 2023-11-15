@@ -27,4 +27,7 @@ function Day:exit(skull) end
 ---@param puncher Player
 function Day:punch(skull, puncher) end
 
+---@param skulls Skull[]
+function Day:globalTick(skulls) end
+
 return Day
