@@ -2,9 +2,32 @@ local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("train")
 
 local skullManager = require("libraries.SkullManager")
+local SkullRenderer = require("libraries.SkullRenderer")
+local deepCopy = require("libraries.deep_copy")
 
+-- settings
 local trainSpeed = 0.15
 
+-- place indicator
+local placeIndicatorRenderer = SkullRenderer:new()
+local placeIndicatorModel = deepCopy(models.train)
+local placeIndicatorPreviousModel = nil
+placeIndicatorRenderer:addPart(placeIndicatorModel)
+placeIndicatorModel:setOpacity(0.5)
+for _, modelpart in pairs(placeIndicatorModel:getChildren()) do
+   modelpart:setVisible(false)
+end
+
+local sideDirections = {
+   up = vec(0, 1, 0),
+   down = vec(0, -1, 0),
+   west = vec(-1, 0, 0),
+   east = vec(1, 0, 0),
+   south = vec(0, 0, 1),
+   north = vec(0, 0, -1)
+}
+
+-- facing to rot
 local facingToRot = {
    west = -90,
    east = 90,
@@ -12,8 +35,10 @@ local facingToRot = {
    north = 180,
 }
 
+-- functions
 local function getNextTrack(skull, startNode)
    local nextPos = skull.pos + (startNode and skull.data.startNode or skull.data.endNode)
+   -- nextPos = (nextPos + 0.5):floor()
    local newSkull = skullManager:get(nextPos)
    if not (newSkull and newSkull.data.isTrain) then
       nextPos.y = nextPos.y - 1
@@ -37,15 +62,46 @@ local function findTrainNearby(skull)
       currentSkull, startNode = getNextTrack(skull, startNode)
       for _ = 1, 16 do
          if not currentSkull or currentSkull.pos == pos then
+            -- print(not currentSkull and 'not found' or 'same pos')
             break
          end
          if currentSkull.data.train then
+            -- print('train found')
             return skull
          end
+
+         -- for _ = 1, 100 do particles['end_rod']:pos(currentSkull.pos + vec(math.random(),math.random(),math.random())):spawn() end
 
          currentSkull, startNode = getNextTrack(currentSkull, startNode)
       end
    end
+end
+
+local function selectTrackType(blockRot, blockFacing)
+   local trackType, model, startNode, endNode, rotOffset
+   if blockFacing then
+      trackType = 'vertical'
+      local rot = facingToRot[blockFacing]
+      model = models.train.vertical
+      startNode = vec(0, 0, 1) * matrices.rotation3(0, rot, 0)
+      endNode = vec(0, 1, 0) - startNode
+      rotOffset = rot
+   elseif blockRot % 4 == 0 then
+      trackType = 'straight'
+      model = models.train.straight
+      startNode = blockRot % 8 == 0 and vec(0, 0, 1) or vec(1, 0, 0)
+      endNode = -startNode
+      rotOffset = blockRot % 8 == 0 and 0 or 90
+   else
+      trackType = 'curve'
+      local rot = math.floor(blockRot / 4) * -90
+      model = models.train.curve
+      local mat = matrices.rotation3(0, rot, 0)
+      startNode = vec(0, 0, 1) * mat
+      endNode = vec(1, 0, 0) * mat
+      rotOffset = rot
+   end
+   return trackType, rotOffset, model, startNode, endNode
 end
 
 --- runs every time a skull is loaded.
@@ -55,32 +111,10 @@ function day:init(skull)
    -- find correct track type
    local block = world.getBlockState(skull.pos)
    local blockRot = block.properties.rotation or 0
-   if block.properties.facing then -- vertical
-      skull.data.trackType = 'vertical'
-      local rot = facingToRot[block.properties.facing]
-      skull.data.model = skull:addPart(models.train.up)
-      skull.data.startNode = vec(0, 0, 1) * matrices.rotation3(0, rot, 0)
-      skull.data.endNode = vec(0, 1, 0) - skull.data.startNode
-      skull.data.rotOffset = rot
-      skull.data.debugColor = vec(0, 1, 0)
-   elseif blockRot % 4 == 0 then
-      skull.data.trackType = 'straight'
-      skull.data.model = skull:addPart(models.train.straight)
-      skull.data.startNode = blockRot % 8 == 0 and vec(0, 0, 1) or vec(1, 0, 0)
-      skull.data.endNode = -skull.data.startNode
-      skull.data.rotOffset = blockRot % 8 == 0 and 0 or 90
-      skull.data.debugColor = vec(1, 0, 0)
-   else
-      skull.data.trackType = 'rotated'
-      skull.data.debugColor = vec(0, 0, 1)
-      local rot = math.floor(blockRot / 4) * -90
-      skull.data.model = skull:addPart(models.train.curve)
-      local mat = matrices.rotation3(0, rot, 0)
-      skull.data.startNode = vec(0, 0, 1) * mat
-      skull.data.endNode = vec(1, 0, 0) * mat
-      skull.data.rotOffset = rot
-   end
-   -- set rot and pos of model
+   local blockFacing = block.properties.facing
+   skull.data.trackType, skull.data.rotOffset, skull.data.model, skull.data.startNode, skull.data.endNode = selectTrackType(blockRot, blockFacing)
+   -- set track model
+   skull.data.model = skull:addPart(skull.data.model)
    skull.data.model:setRot(0, skull.data.rotOffset, 0)
    skull.data.model:setPos(skull.pos * 16)
    -- add train model
@@ -94,7 +128,6 @@ function day:tick(skull)
    -- spawn train
    skull.data.spawnTrainTime = math.max(skull.data.spawnTrainTime - 1, 0)
    if skull.data.spawnTrainTime == 1 then
-      -- check if train already exists on track
       -- spawn train if it doesnt exist on track already
       if not findTrainNearby(skull) then
          skull.data.train = {
@@ -164,7 +197,7 @@ local function renderTrain(skull, time, trainModel, backwards)
       trainModel:setRot(0, rotOffset + (backwards and 180 or 0), 0)
       trainModel.start:setRot(0, 0, 0)
       trainModel.start:setPivot(0, 0, 0)
-   elseif skull.data.trackType == 'rotated' then
+   elseif skull.data.trackType == 'curve' then
       trainModel.start:setPos(0, 0, 0)
       local rot = time * 90
       trainModel:setRot(0, rotOffset, 0)
@@ -236,5 +269,56 @@ function day:exit(skull)
             end
          end
       end
+   end
+end
+
+function day:globalTick()
+   if placeIndicatorPreviousModel then
+      placeIndicatorPreviousModel:setVisible(false)
+      placeIndicatorPreviousModel = nil
+   end
+   local block, pos, side = viewer:getTargetedBlock(true, 5)
+   -- stop if not looking at block or looking at bottom of block
+   if block:isAir() or side == 'down' then
+      return
+   end
+   -- offset pos
+   pos = pos + sideDirections[side] * 0.99
+    -- stop if place block is not air
+   if not world.getBlockState(pos):isAir() then
+      return
+   end
+   -- stop if not touching any other rail
+   local touching = false
+   for _, v in pairs(sideDirections) do
+      local neighbourBlock = world.getBlockState(pos + v)
+      if neighbourBlock.id == 'minecraft:player_head' or neighbourBlock.id == 'minecraft:player_wall_head' then
+         local data = neighbourBlock:getEntityData()
+         if data and data.SkullOwner and data.SkullOwner.Id and avatar:getUUID() == client.intUUIDToString(table.unpack(data.SkullOwner.Id)) then
+            touching = true
+            break
+         end
+      end
+   end
+   if not touching then
+      return
+   end
+   -- get correct track type
+   local rot = math.round(player:getRot().y / 22.5) % 16
+   local facing
+   if side ~= "up" then facing = side end
+   local trackType, rotOffset = selectTrackType(rot, facing)
+   -- render model
+   local model = placeIndicatorModel[trackType]
+   placeIndicatorPreviousModel = model
+   model:setVisible(true)
+   model:setPos(pos:floor() * 16)
+   model:setRot(0, rotOffset, 0)
+end
+
+function day:globalExit()
+   if placeIndicatorPreviousModel then
+      placeIndicatorPreviousModel:setVisible(false)
+      placeIndicatorPreviousModel = nil
    end
 end
