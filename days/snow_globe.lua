@@ -1,5 +1,5 @@
 local Calendar = require("libraries.Calendar")
-local day = Calendar:newDay("snow_globe", 1)
+local day = Calendar:newDay("snow_globe")
 local tween = require("libraries.GNTweenLib")
 
 function day:init(skull)

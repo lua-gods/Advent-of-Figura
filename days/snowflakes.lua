@@ -2,7 +2,7 @@ local Calendar = require("libraries.Calendar")
 local tween = require("libraries.GNTweenLib")
 
 ---@class Day.Snowflakes: Day
-local day = Calendar:newDay("snowflakes", 12)
+local day = Calendar:newDay("snowflakes")
 
 local model = models.snowflakes
 local variants = {

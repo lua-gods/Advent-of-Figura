@@ -6,7 +6,7 @@ local tween = require("libraries.GNTweenLib")
 ---@field skulls Skull[]
 ---@field needs_pairing boolean
 ---@field last_pair integer
-local day = Calendar:newDay("baubles", 4)
+local day = Calendar:newDay("baubles")
 day.skulls = {}
 day.last_pair = 0
 

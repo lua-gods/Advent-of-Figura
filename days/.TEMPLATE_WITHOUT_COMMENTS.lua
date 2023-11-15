@@ -1,5 +1,5 @@
 local Calendar = require("libraries.Calendar")
-local day = Calendar:newDay("", -1)
+local day = Calendar:newDay("")
 
 ---@param skull Skull
 function day:init(skull)

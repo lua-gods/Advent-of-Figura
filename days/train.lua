@@ -1,5 +1,5 @@
 local Calendar = require("libraries.Calendar")
-local day = Calendar:newDay("train", 16) -- name and day number.
+local day = Calendar:newDay("train")
 
 local skullManager = require("libraries.SkullManager")
 

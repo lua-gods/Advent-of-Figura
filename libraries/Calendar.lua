@@ -1,7 +1,8 @@
 local Day = require("libraries.Day")
+local order = require("libraries.day_order")
 
 ---@class Calendar
----@field private days table<integer|"fallback", Day>
+---@field private days table<string|"fallback", Day>
 local Calendar = {}
 Calendar.__index = Calendar
 
@@ -12,27 +13,22 @@ function Calendar.new()
 end
 
 ---@param name string
----@param number integer|"fallback"
-function Calendar:newDay(name, number)
+function Calendar:newDay(name)
     local day = Day.new(name)
-    self.days[number] = day
+    self.days[name] = day
     return day
 end
 
 ---@param number integer|"fallback"
 ---@return Day?
 function Calendar:byDate(number)
-    return self.days[number]
+    return order[number] and self.days[order[number]]
 end
 
 ---@param name string
 ---@return Day?
 function Calendar:byName(name)
-    for _, day in pairs(self.days) do
-        if day.name == name then
-            return day
-        end
-    end
+    return self.days[name]
 end
 
 function Calendar:getFallback()

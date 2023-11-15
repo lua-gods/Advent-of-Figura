@@ -1,5 +1,5 @@
 local Calendar = require("libraries.Calendar")
-local day = Calendar:newDay("door_wreath", 20)
+local day = Calendar:newDay("door_wreath")
 
 function toggleDoorHoligram(skull,toggle)
   if toggle then

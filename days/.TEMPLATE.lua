@@ -1,6 +1,6 @@
 local Calendar = require("libraries.Calendar")
-local day = Calendar:newDay("template", 69)
--- name and day number.
+local day = Calendar:newDay("template")
+-- name
 
 models.model.days.fallback.cube:setPrimaryTexture("RESOURCE", "missingno")
 -- do any pre-init stuff here.

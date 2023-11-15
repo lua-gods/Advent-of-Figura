@@ -1,5 +1,5 @@
 local Calendar = require("libraries.Calendar")
-local day = Calendar:newDay("fallback", "fallback")
+local day = Calendar:newDay("fallback")
 
 models.model.days.fallback.cube:setPrimaryTexture("RESOURCE", "missingno")
 

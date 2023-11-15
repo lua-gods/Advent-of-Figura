@@ -4,7 +4,7 @@ local tween = require("libraries.GNTweenLib")
 ---@class Day.Jukebox: Day
 ---@field main Skull
 ---@field time integer
-local day = Calendar:newDay("jukebox", 2)
+local day = Calendar:newDay("jukebox")
 
 local notes = {
     [0] = { 1.26, 1.498, 1, 0.5 },

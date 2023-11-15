@@ -2,7 +2,7 @@ local Calendar = require("libraries.Calendar")
 local FireworkManager = require("libraries.fireworks.FireworkManager")
 local variants = require("libraries.fireworks.variants")
 local tween = require("libraries.GNTweenLib")
-local day = Calendar:newDay("fireworks", 24)
+local day = Calendar:newDay("fireworks")
 
 function day:init(skull)
     skull.data.part = skull:addPart(models.fireworks.Barrel)

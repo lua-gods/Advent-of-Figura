@@ -2,7 +2,7 @@ local Calendar = require("libraries.Calendar")
 local manager = require("libraries.SkullManager")
 local tween = require("libraries.GNTweenLib")
 
-local day = Calendar:newDay("snowman", 3)
+local day = Calendar:newDay("snowman")
 
 local variants = {
     top = models.snowman.Top:getChildren(),
