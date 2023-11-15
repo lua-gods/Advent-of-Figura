@@ -79,7 +79,7 @@ local function renderSpline(skull, spline)
         for i = 1, #spline do
             local point = spline[i]
             local offset = math.lerp(skull.data.last.offset, skull.offset, i / #spline)
-            local vine = skull:addPart(variants.vine[math.random(1, #variants.vine)]):pos(point.pos + offset):rot(dirToAngle((point.pos - spline[i - 1].pos):normalize()))
+            local vine = skull:addPart(variants.vine[math.random(1, #variants.vine)]):pos((point.pos + offset) * 16):rot(dirToAngle((point.pos - spline[i - 1].pos):normalize()))
             processVariant(vine)
         end
     end
