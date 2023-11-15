@@ -114,6 +114,14 @@ local function bounce(skull)
     end
 end
 
+function day:globalInit()
+    self.time = 0
+end
+
+function day:globalTick()
+    self.time = (self.time + 1) % 720
+end
+
 ---@param skull Skull
 function day:tick(skull)
     local pitches = note(self.time, skull.pos + OFFSET)
@@ -139,12 +147,6 @@ function day:tick(skull)
         end
     end
 
-    if self.main == skull then
-        self.time = (self.time + 1) % 720
-    end
-    if self.main and not self.main:isActive() then
-        self.main = skull
-    end
     return pitches and true or false
 end
 
