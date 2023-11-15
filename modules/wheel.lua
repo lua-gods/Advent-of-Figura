@@ -7,14 +7,19 @@ action_wheel:setPage(main_page)
 
 local removed = {}
 main_page:newAction():title("§cRemove nearby skulls\n§7(Right click to undo)§r"):item("tnt"):onLeftClick(function ()
+    local i = 0
     events.SKULL_RENDER:register(function (delta, block, item, entity, ctx)
         if block then
+            i = i + 1
             local pos = block:getPos()
             if (pos - client:getCameraPos()):length() > 12 then return end
-            removed[#removed + 1] = { pos = pos, block = world.getBlockState(pos):toStateString() }
+            removed[#removed + 1] = { pos = pos, block = block:toStateString() }
             host:sendChatCommand("setblock " .. pos.x .. " " .. pos.y .. " " .. pos.z .. " air")
             for _ = 1, 20 do
                 particles["smoke"]:pos(pos + vec(0.5,0,0.5) + rng.vec3() * 0.3):velocity(rng.vec3() * 0.2):scale(rng.float(0.4,0.8)):spawn()
+            end
+            if i < 5 then
+                sounds["entity.illusioner.prepare_blindness"]:pos(pos):subtitle("Skull removed"):pitch(3):volume(1/i):attenuation(2):play()
             end
         end
     end, "remove_skulls")
@@ -30,6 +35,9 @@ end):onRightClick(function ()
             log("Command too long, could not restore")
         else
             host:sendChatCommand(command)
+        end
+        if i < 5 then
+            sounds["entity.ender_eye.death"]:pos(block.pos):subtitle("Skull undeleted"):pitch(1.5):volume(1/i):attenuation(2):play()
         end
         for _ = 1, 20 do
             particles["end_rod"]:pos(block.pos + vec(0.5,0,0.5) + rng.vec3() * 0.2):velocity(rng.vec3() * 0.1):color(vectors.hsvToRGB(rng.float(0,1),0.4,1)):lifetime(rng.float(10,20)):scale(0.3):spawn()
