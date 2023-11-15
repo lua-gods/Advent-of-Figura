@@ -1,5 +1,5 @@
 local Calendar = require("libraries.Calendar")
-local day = Calendar:newDay("snowstorm", 18)
+local day = Calendar:newDay("snowstorm")
 --local snowStormDatabase = {}
 
 local function reloadSnow(skull)

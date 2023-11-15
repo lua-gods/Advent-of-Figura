@@ -11,11 +11,11 @@ return {
     "snowflakes", -- 4P5
     "snowball_gun", -- 4P5
     nil,
+    nil,
+    nil,
     "fireworks", -- 4P5
     nil,
-    nil,
-    nil,
-    nil,
+    "snowstorm",
     nil,
     nil,
     nil,
