@@ -34,6 +34,7 @@ function events.SKULL_RENDER(_, blockstate)
     end
 end
 
+local initialized = {}
 function events.WORLD_TICK()
     local active = {}
 
@@ -44,6 +45,18 @@ function events.WORLD_TICK()
     end
     
     for day, skulls in next, active do
-        day:globalTick(skulls)
+        if not initialized[day] then
+            initialized[day] = skulls
+            day:globalInit(skulls)
+        end
+    end
+    
+    for day, skulls in next, initialized do
+        if active[day] then
+            day:globalTick(skulls)
+        else
+            day:globalExit(skulls)
+            initialized[day] = nil
+        end
     end
 end

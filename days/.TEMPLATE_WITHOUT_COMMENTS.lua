@@ -27,3 +27,18 @@ end
 function day:exit(skull)
 
 end
+
+---@param skulls Skull[]
+function day:globalTick(skulls)
+
+end
+
+---@param skulls Skull[]
+function day:globalInit(skulls)
+
+end
+
+---@param skulls Skull[]
+function day:globalExit(skulls)
+
+end

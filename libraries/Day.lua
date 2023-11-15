@@ -28,6 +28,12 @@ function Day:exit(skull) end
 function Day:punch(skull, puncher) end
 
 ---@param skulls Skull[]
+function Day:globalInit(skulls) log("ny") end
+
+---@param skulls Skull[]
+function Day:globalExit(skulls) log("gon") end
+
+---@param skulls Skull[]
 function Day:globalTick(skulls) end
 
 return Day

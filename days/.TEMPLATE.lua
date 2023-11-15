@@ -5,7 +5,7 @@ local day = Calendar:newDay("template", 69)
 models.model.days.fallback.cube:setPrimaryTexture("RESOURCE", "missingno")
 -- do any pre-init stuff here.
 
---- runs every time a skull is loaded.
+---runs every time a skull is loaded.
 ---@param skull Skull
 function day:init(skull) 
     -- skull.data persists between ticks and is unique to each skull.
@@ -16,29 +16,49 @@ function day:init(skull)
     -- adds a ModelPart to the skull, automatically positioning and rotating it.
     -- you can modify the modelpart for each skull via editing the skull.data.model, instead of the model supplied
 end
---- every world tick.
+
+---every world tick.
 ---@param skull Skull
 function day:tick(skull)
     local rainbow = vectors.hsvToRGB(TIME / 40, 1, 1)
     particles["end_rod"]:pos(skull.render_pos + vec(0.5, 0.5, 0.5)):velocity(0,1,0):color(rainbow):spawn() -- skull.render_pos accounts for wall head offsets.
 end
 
---- when the skull is punched.
+---when the skull is punched.
 ---@param skull Skull
 ---@param puncher Player
 function day:punch(skull, puncher)
     log("ouch")
 end
 
--- every world render.
+---every world render.
 ---@param skull Skull
 ---@param delta number
 function day:render(skull, delta)
 
 end
+
 ---called when the skull is destroyed, unloaded, or switched to a different day. Do cleanup here.
 ---@param skull Skull
 function day:exit(skull)
     skull.data.flash:remove()
     -- removes the flash particle we created in init.
+end
+
+---called every world tick. `skulls` is an array of all active skulls using this day.
+---@param skulls Skull[]
+function day:globalTick(skulls)
+
+end
+
+---called when the day is first loaded by any skull. Does not runs for subsequent skulls. If all skulls using this day are unloaded, this will run again when a skull is loaded.
+---@param skulls Skull[]
+function day:globalInit(skulls)
+
+end
+
+---called when the final skull using this day is unloaded.
+---@param skulls Skull[]
+function day:globalExit(skulls)
+
 end
