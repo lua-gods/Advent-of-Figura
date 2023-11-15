@@ -78,5 +78,7 @@ function day:punch(skull, puncher)
 end
 
 function day:exit(skull)
-    skull.data.fireworks:remove()
+    if skull.data.fireworks then
+        skull.data.fireworks:remove()
+    end
 end

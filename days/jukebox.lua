@@ -69,6 +69,72 @@ local notes = {
     [660] = { 0.749, 1, 0.5, 0.63 },
 }
 
+world:newBlock("minecraft:oak_planks"):getTags()
+---@type table<string,fun(block : BlockState): boolean?>
+local instrument = {
+    ["block.note_block.bass"] = function (block)
+        for key, tag in pairs(block:getTags()) do
+            if tag == "minecraft:mineable/axe" then
+                return true
+            end
+        end
+    end,
+    ["block.note_block.snare"] = function (block)
+        local id = block.id
+        if id == "minecraft:sand" or id == "minecraft:gravel" then
+            return true
+        elseif id:sub(-16,-1) == "concrete_powder" then
+            return true
+        end
+    end,
+    ["block.note_block.hat"] = function (block)
+        local id = block.id
+        if id:sub(-6,-1) == "glass" then
+            return true
+        elseif id == "minecraft:sea_lantern" or id == "minecraft:beacon" then
+            return true
+        end
+    end,
+    ["block.note_block.bell"] = function (block) return block.id == "minecraft:gold_block" end,
+    ["violin"] = function (block) return block.id == "minecraft:note_block" end,
+    ["block.note_block.flute"] = function (block) return block.id == "minecraft:clay" end,
+    ["block.note_block.chime"] = function (block) return block.id == "minecraft:packed_ice" end,
+    ["block.note_block.xylophone"] = function (block) return block.id == "minecraft:bone_block" end,
+    ["block.note_block.iron_xylophone"] = function (block) return block.id == "minecraft:iron_block" end,
+    ["block.note_block.cow_bell"] = function (block) return block.id == "minecraft:soul_sand" or block.id == "minecraft:soul_soil" end,
+    ["block.note_block.didgeridoo"] = function (block) return block.id:find("pumpkin") ~= nil end,
+    ["block.note_block.bit"] = function (block) return block.id == "minecraft:emerald_block" end,
+    ["block.note_block.banjo"] = function (block) return block.id == "minecraft:hay_block" end,
+    ["block.note_block.pling"] = function (block) return block.id == "minecraft:glowstone" end,
+    ["block.note_block.imitate.skeleton"] = function (block) return block.id == "minecraft:skeleton_skull" end,
+    ["block.note_block.imitate.wither_skeleton"] = function (block) return block.id == "minecraft:wither_skeleton_skull" end,
+    ["block.note_block.imitate.zombie"] = function (block) return block.id == "minecraft:zombie_head" end,
+    ["block.note_block.imitate.creeper"] = function (block) return block.id == "minecraft:creeper_head" end,
+    ["block.note_block.imitate.piglin"] = function (block) return block.id == "minecraft:piglin_head" end,
+    ["block.note_block.imitate.ender_dragon"] = function (block) return block.id == "minecraft:dragon_head" end,
+    ["block.note_block.guitar"] = function (block) return block.id:find("wool") ~= nil end,
+    ["block.note_block.basedrum"] = function (block)
+        local id = block.id  -- LMAO -GN
+        if id:find("stone") or id:find("quartz") or id:find("bricks")
+        or id:find("coral") or id:find("nylium") or id:find("concrete")
+        or id:find("sanstone") or id:find("ore")
+        or id == "minecraft:observer" or id == "minecraft:obsidian"
+        or id == "minecraft:netherack"or id == "minecraft:respawn_anchor"
+        or id == "minecraft:bedrock" then return true end
+    end
+}
+
+local function find_instrument(block)
+    if block.id then
+        for key, value in pairs(instrument) do
+            if value(block) then
+                return key
+            end
+        end
+    end
+    return "block.note_block.harp"
+end
+
 ---@param skull Skull
 function day:init(skull)
     if not self.main then
@@ -76,15 +142,16 @@ function day:init(skull)
         self.main = skull
     end
     skull:addPart(models.jukebox)
+    skull.data.instrument = find_instrument(world.getBlockState(skull.pos:copy():sub(0,1,0)))
     skull.data.anim_time = 0
     skull.data.particles = {}
 end
 
 local UP = vec(0,1,0)
-local function note(time, pos)
+local function note(time, pos, id)
     if notes[time] then
         for i = 1, #notes[time] do
-            sounds["block.note_block.harp"]:pos(pos + UP):attenuation(1.5):volume(0.7):pitch(notes[time][i]):play()
+            sounds[id]:pos(pos + UP):attenuation(1.5):volume(0.7):pitch(notes[time][i]):play()
         end
         return notes[time]
     end
@@ -124,7 +191,7 @@ end
 
 ---@param skull Skull
 function day:tick(skull)
-    local pitches = note(self.time, skull.pos + OFFSET)
+    local pitches = note(self.time, skull.pos + OFFSET, skull.data.instrument)
     if pitches then
         for i = 1, #pitches do
             local lifetime = rng.float(20, 40)
