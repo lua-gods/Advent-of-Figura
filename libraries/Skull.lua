@@ -103,9 +103,11 @@ function Skull:setActive(active)
 end
 
 function Skull:reset()
-    self:exit()
+    if self:isActive() then
+        self:exit()
+    end
     self.data = {}
-    self.initialized = false
+    self:setActive(false)
     self.renderer:reset()
     self.parts = {}
 end
