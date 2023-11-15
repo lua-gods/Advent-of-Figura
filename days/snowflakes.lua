@@ -23,7 +23,7 @@ local function tweenIn(part, speed)
 end
 
 local function tweenOut(part)
-    tween.tweenFunction(1, 0, 1, "inOutCirc", function(x)
+    tween.tweenFunction(1, 0, 0.5, "inOutCirc", function(x)
         part:scale(x--[[@as number]])
     end, function()
         part:visible(false)
@@ -55,20 +55,20 @@ function day:init(skull, seed)
     skull.data.parts = {}
     local formation_speed = rng.float(0.7,1.1)
     skull.data.seed = seed or 1
-    math.randomseed(skull.pos.x * 73856093 + skull.pos.y * 19349663 + skull.pos.z * 83492791 * skull.data.seed * (skull.rot + 1))
+    math.randomseed(skull.pos.x * 56093 + skull.pos.y * 49663 + skull.pos.z * 92791 * (skull.data.seed + skull.rot))
     math.random(); math.random(); math.random()
 
     local root = skull:addPart(models:newPart("snowflakes"))
 
     for _ = 1, rng.int(1, 2) do
-        skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(rng.of(variants.core), root):rot(0, rng.step(0, 360, 45) - skull.rot, 0), 0.5 * formation_speed)
+        skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(rng.of(variants.core), root):rot(0, rng.step(0, 360, 45) - skull.rot, 0), 0.3 * formation_speed)
     end
 
     for _ = 1, rng.int(1, 2) do
         local arm = rng.of(variants.arm1)
         local step = math.random() > 0.5 and 0 or 45
         for i = 0, 3 do
-            skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(arm, root):rot(0, 90 * i + step, 0), 0.75 * formation_speed)
+            skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(arm, root):rot(0, 90 * i + step, 0), 0.4 * formation_speed)
         end
     end
 
@@ -76,7 +76,7 @@ function day:init(skull, seed)
         local arm = rng.of(variants.arm2)
         local step = math.random() > 0.5 and 0 or 45
         for i = 0, 3 do
-            skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(arm, root):rot(0, 90 * i + step, 0), 1 * formation_speed)
+            skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(arm, root):rot(0, 90 * i + step, 0), 0.5 * formation_speed)
         end
     end
 
