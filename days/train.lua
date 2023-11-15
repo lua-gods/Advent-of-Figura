@@ -3,7 +3,7 @@ local day = Calendar:newDay("train")
 
 local skullManager = require("libraries.SkullManager")
 
-local trainSpeed = 0.5
+local trainSpeed = 0.15
 
 local facingToRot = {
    west = -90,
@@ -91,7 +91,6 @@ end
 --- every world tick.
 ---@param skull Skull
 function day:tick(skull)
-   if TIME % 4 >= 1 then return end
    -- spawn train
    skull.data.spawnTrainTime = math.max(skull.data.spawnTrainTime - 1, 0)
    if skull.data.spawnTrainTime == 1 then
@@ -197,7 +196,6 @@ end
 ---@param skull Skull
 ---@param delta number
 function day:render(skull, delta)
-   delta = delta / 4 + ((TIME - 1) % 4) / 4
    -- render train
    local train = skull.data.train
    local trainModel = skull.data.trainModel
