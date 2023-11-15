@@ -44,15 +44,20 @@ function Skull.new(blockstate, renderer, day)
 end
 
 ---Adds the given part to the skull. The part will be removed when the skull resets.
+---The part will be offset by the skull's render position and rotation. (self.render_pos * 16, -self.rot)
+---Specifying a parent will add the part as a child of the parent, with no offset.
 ---@param part ModelPart
----@param pos? Vector3 world-relative. Defaults to skull.render_pos. Multiplied by 16.
----@param rot? Vector3 defaults to vec(0, -skull.rot, 0)
+---@param parent? ModelPart
 ---@return ModelPart
-function Skull:addPart(part, pos, rot)
+function Skull:addPart(part, parent)
     local copy = deepCopy(part)
-    copy:pos((pos or self.render_pos) * 16):rot(rot or vec(0, -self.rot, 0)):visible(true)
-    copy:light(world.getBlockLightLevel(pos or self.pos), world.getSkyLightLevel(pos or self.pos))
-    self.renderer:addPart(copy)
+    copy:pos(parent and vec(0,0,0) or self.render_pos * 16):rot(0, parent and 0 or -self.rot, 0):visible(true)
+    copy:light(world.getBlockLightLevel(self.pos), world.getSkyLightLevel(self.pos))
+    if parent then
+        parent:addChild(copy)
+    else
+        self.renderer:addPart(copy)
+    end
     return copy
 end
 
