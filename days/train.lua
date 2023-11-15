@@ -161,9 +161,6 @@ local function renderTrain(skull, time, trainModel, backwards)
    -- time = time / 16 * 17.6
    if skull.data.trackType == 'straight' then
       trainModel:setPos(skull.pos * 16)
-      if player:isCrouching() then
-         print(math.floor(time * 100 * 16) / 100)
-      end
       trainModel.start:setPos(0, 0, time * -16)
       trainModel:setRot(0, rotOffset + (backwards and 180 or 0), 0)
       trainModel.start:setRot(0, 0, 0)
