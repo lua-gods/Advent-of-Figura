@@ -1,6 +1,6 @@
 local Calendar = require("libraries.Calendar")
-local day = Calendar:newDay("snowstorm")
---local snowStormDatabase = {}
+local day = Calendar:newDay("snowfall")
+--local snowfallDatabase = {}
 
 local function reloadSnow(skull)
   for x = -6, 6 do
@@ -14,9 +14,9 @@ local function reloadSnow(skull)
             if blockstate:getCollisionShape()[1] then
               blockHeight = blockstate:getCollisionShape()[1][2][2]
             end
-            skull.data.snowstorm.snow:newPart("x"..x.."z"..z)
-            skull.data.snowstorm.snow["x"..x.."z"..z]:addChild(skull.data.snowstorm.snow.snow)
-            skull.data.snowstorm.snow["x"..x.."z"..z]:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
+            skull.data.snowfall.snow:newPart("x"..x.."z"..z)
+            skull.data.snowfall.snow["x"..x.."z"..z]:addChild(skull.data.snowfall.snow.snow)
+            skull.data.snowfall.snow["x"..x.."z"..z]:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
           end
         end
 
@@ -27,9 +27,9 @@ end
 
 ---@param skull Skull
 function day:init(skull)
-  skull.data.snowstorm = skull:addPart(models.snowstorm)
-  skull.data.snowstorm:setRot(0,0,0)
-  --snowStormDatabase[tostring(skull.pos)] = "temp"
+  skull.data.snowfall = skull:addPart(models.snowfall)
+  skull.data.snowfall:setRot(0,0,0)
+  --snowfallDatabase[tostring(skull.pos)] = "temp"
   reloadSnow(skull)
 end
 
