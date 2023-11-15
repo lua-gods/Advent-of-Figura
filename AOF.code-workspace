@@ -8,6 +8,7 @@
         "fileMatch": ["**/avatar.json"],
         "url": ".vscode/avatar.schema.json"
       }
-    ]
+    ],
+    "Lua.hint.enable": true
   }
 }

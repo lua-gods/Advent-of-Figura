@@ -400,7 +400,7 @@
   \*==============================================================================================*/
   "hint": {
     // Enable inline hints.
-    "enable": false,
+    "enable": true,
 
     // Show an inline hint at assignment.
     "setType": true,
