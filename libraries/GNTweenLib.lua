@@ -452,14 +452,27 @@ local tween = {}
 tween.ease = easing
 local queue_free = {}
 
----@param from number|Vector2|Vector3|Vector4
----@param to number|Vector2|Vector3|Vector4
+---@class GNtween
+---@field from number|Vector.any
+---@field to number|Vector.any
+---@field duration number
+---@field start number
+---@field type EaseTypes
+---@field tick fun(x : number|Vector.any)
+---@field on_finish function?
+---@field is string
+---@field id string|number
+
+---@param from number|Vector.any
+---@param to number|Vector.any
 ---@param duration number
 ---@param ease EaseTypes
----@param tick fun(x : number|Vector2|Vector3|Vector4)
+---@param tick fun(x : number|Vector.any)
 ---@param finish function?
 ---@param id string?
+---@return GNtween
 function tween.tweenFunction(from, to, duration, ease, tick, finish, id)
+  ---@type GNtween
   local compose = {
     from = from,
     to = to,
@@ -467,7 +480,9 @@ function tween.tweenFunction(from, to, duration, ease, tick, finish, id)
     duration = duration,
     type = ease,
     tick = tick,
-    on_finish = finish
+    on_finish = finish,
+    is = type(from),
+    id = nil,
   }
   if id then
     compose.id = id
@@ -481,6 +496,7 @@ function tween.tweenFunction(from, to, duration, ease, tick, finish, id)
       end
     end
   end
+  return compose
 end
 
 local function free(id)
@@ -493,7 +509,7 @@ events.WORLD_RENDER:register(function()
     local time = (system_time - ease.start) / 1000
     local from_unpacked
     local to_unpacked
-    if type(ease.from) == "number" then
+    if ease.is == "number" then
       if time > ease.duration then
         pcall(ease.tick,ease.to,time/ease.duration)
         free(id)
@@ -502,7 +518,7 @@ events.WORLD_RENDER:register(function()
           free(id)
         end
       end
-    else
+    elseif ease.is:sub(1,-2) == "Vector" then
       from_unpacked = {ease.from:unpack()}
       to_unpacked = {ease.to:unpack()}
 
@@ -528,4 +544,5 @@ events.WORLD_RENDER:register(function()
     queue_free = {}
   end
 end)
+
 return tween
