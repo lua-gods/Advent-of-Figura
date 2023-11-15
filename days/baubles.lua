@@ -74,12 +74,12 @@ local function dirToAngle(dir)
     return vec(-math.deg(math.asin(dir.y)), math.deg(math.atan2(dir.x, dir.z)), 0)
 end
 
-local function renderSpline(skull, spline)
+local function renderSpline(skull, spline, connected)
     if isClear(spline) then
-        for i = 1, #spline do
-            local point = spline[i]
-            local offset = math.lerp(skull.data.last.offset, skull.offset, i / #spline)
-            local vine = skull:addPart(variants.vine[math.random(1, #variants.vine)]):pos((point.pos + offset) * 16):rot(dirToAngle((point.pos - spline[i - 1].pos):normalize()))
+        for j = 1, #spline do
+            local point = spline[j]
+            local offset = math.lerp(connected.offset, skull.offset, j / #spline)
+            local vine = skull:addPart(variants.vine[math.random(1, #variants.vine)]):pos((point.pos + offset) * 16):rot(dirToAngle((point.pos - spline[j - 1].pos):normalize()))
             processVariant(vine)
         end
     end
@@ -94,55 +94,73 @@ local function roll(skull)
     local bauble = skull:addPart(variants.bauble[math.random(1, #variants.bauble)])
     processVariant(bauble)
 
-    if skull.data.last then
-        local i = 0
-        local spline
-        repeat
-            spline = catenary(skull.data.last.pos, skull.pos, 0.4, 1.5 - i * 0.1)
-            i = i + 1
-        until isClear(spline) or i > 10
-        renderSpline(skull, spline)
+    if skull.data.to_connect then
+        for i = 1, #skull.data.to_connect do
+            local other = skull.data.to_connect[i]
+            if not other.data.connected[skull] then
+                local j = 0
+                local spline
+                repeat
+                    spline = catenary(other.pos, skull.pos, 0.4, 1.5 - j * 0.1)
+                    j = j + 1
+                until isClear(spline) or j > 10
+                renderSpline(skull, spline, other)
+                skull.data.connected[other] = true
+            end
+        end
     end
 end
 
-local function shuffle(tbl)
-    table.sort(tbl, function (a, b)
-        return a.pos:lengthSquared() > b.pos:lengthSquared()
-    end)
-end
-
 function day:pairSkulls()
-    shuffle(self.skulls)
-    local connected = {}
     for i = 1, #self.skulls do
         local skull = self.skulls[i]
-        local other_skull
-        local j = 0
-        repeat
-            j = j + 1
-            other_skull = self.skulls[math.random(1, #self.skulls)]
-        until (not connected[other_skull] and skull ~= other_skull) or j > 10
-        connected[other_skull] = true
-        skull.data.last = other_skull
-        roll(skull)
+        local first_closest, second_closest
+        local first_closest_dist, second_closest_dist = math.huge, math.huge
+        for j = 1, #self.skulls do
+            if i ~= j then
+                local other = self.skulls[j]
+                local dist = (skull.pos - other.pos):lengthSquared()
+                if dist < first_closest_dist then
+                    second_closest = first_closest
+                    second_closest_dist = first_closest_dist
+                    first_closest = other
+                    first_closest_dist = dist
+                elseif dist < second_closest_dist then
+                    second_closest = other
+                    second_closest_dist = dist
+                end
+            end
+        end
+        skull.data.to_connect = {
+            first_closest,
+            second_closest,
+        }
+        skull.data.connected = {}
+    end
+
+    for i = 1, #self.skulls do
+        roll(self.skulls[i])
     end
 end
 
 function day:addSkull(skull)
     self.skulls[#self.skulls + 1] = skull
-    self.needs_pairing = true
 end
 
 function day:init(skull)
+    self.needs_pairing = true
     self:addSkull(skull)
 end
 
-function day:tick(skull)
+function day:globalTick()
     if self.needs_pairing and TIME > self.last_pair then
         self:pairSkulls()
         self.last_pair = TIME
         self.needs_pairing = false
     end
+end
+
+function day:tick(skull)
     -- if skull.data.last then
     --     local diff = (skull.data.last.render_pos + vec(0.5,0.5,0.5)) - (skull.render_pos + vec(0.5,0.5,0.5))
     --     local dir = diff:copy():normalize()
