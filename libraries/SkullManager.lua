@@ -66,6 +66,7 @@ function SkullManager:init()
                 end
             else
                 self:remove(skull)
+                skull:setActive(false)
             end
         end
     end
