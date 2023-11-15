@@ -17,9 +17,9 @@
 | 15  |              |        |
 | 16  | Train        | Auria  |
 | 17  |              |        |
-| 18  |              |        |
+| 18  | Snowstorm    | Chloe  |
 | 19  |              |        |
-| 20  |Door Wreath   |Chloe   |
+| 20  | Door Wreath  | Chloe  |
 | 21  |              |        |
 | 22  |              |        |
 | 23  |              |        |
