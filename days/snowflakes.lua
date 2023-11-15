@@ -14,12 +14,10 @@ local variants = {
 local function tweenIn(part, speed)
     part:scale(0)
     local rot = part:getRot()
-    local pos = part:getPos()
     local dir = vec(0, math.floor(TIME + speed) % 2 == 0 and -90 or 90, 0)
     tween.tweenFunction(0, 1, speed, "inOutCirc", function(x)
         part:scale(x--[[@as number]])
         part:rot(rot + dir * x)
-        part:pos(pos + vec(0, 4, 0) * (1 - x))
     end)
     return part
 end
@@ -37,7 +35,7 @@ local palette = {
     vec(0.87, 0.97, 0.97, 1),
     vec(0.94, 0.97, 0.97, 1),
 }
-local TRANSPARENT_BLACK = vec(0,0,0,0)
+
 local base_texture = assert(textures.snowflakes)
 local texture_variants = {}
 for i = 1, 5 do
@@ -57,38 +55,40 @@ function day:init(skull, seed)
     skull.data.parts = {}
     local formation_speed = rng.float(0.7,1.1)
     skull.data.seed = seed or 1
-    math.randomseed(skull.pos.x * 73856093 + skull.pos.y * 19349663 + skull.pos.z * 83492791 * skull.data.seed)
+    math.randomseed(skull.pos.x * 73856093 + skull.pos.y * 19349663 + skull.pos.z * 83492791 * skull.data.seed * (skull.rot + 1))
     math.random(); math.random(); math.random()
 
-    for _ = 1, rng.of(1, 2) do
-        skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(rng.of(variants.core)):rot(0, rng.step(0, 360, 45), 0), 0.5 * formation_speed)
+    local root = skull:addPart(models:newPart("snowflakes"))
+
+    for _ = 1, rng.int(1, 2) do
+        skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(rng.of(variants.core), root):rot(0, rng.step(0, 360, 45) - skull.rot, 0), 0.5 * formation_speed)
     end
 
-    for _ = 1, rng.of(1, 2) do
+    for _ = 1, rng.int(1, 2) do
         local arm = rng.of(variants.arm1)
         local step = math.random() > 0.5 and 0 or 45
         for i = 0, 3 do
-            skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(arm):rot(0, 90 * i + step, 0), 0.75 * formation_speed)
+            skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(arm, root):rot(0, 90 * i + step, 0), 0.75 * formation_speed)
         end
     end
 
-    for _ = 1, rng.of(1, 2) do
+    for _ = 1, rng.int(1, 2) do
         local arm = rng.of(variants.arm2)
         local step = math.random() > 0.5 and 0 or 45
         for i = 0, 3 do
-            skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(arm):rot(0, 90 * i + step, 0), 1 * formation_speed)
+            skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(arm, root):rot(0, 90 * i + step, 0), 1 * formation_speed)
         end
     end
 
     for i = 1, #skull.data.parts do
         local part = skull.data.parts[i]
         part:primaryTexture("CUSTOM", rng.of(texture_variants))
+        part:light(15,15)
     end
-end
 
----@param skull Skull
-function day:tick(skull)
-
+    local wall = skull.is_wall_head and -90 or 0
+    root:rot(wall, skull.rot, 0):pos(skull.render_pos * 16 + skull.offset * 15):light(15,15)
+    skull.data.root = root
 end
 
 ---@param skull Skull
@@ -103,15 +103,4 @@ function day:punch(skull, puncher)
     end
 
     self:init(skull, skull.data.seed + 1)
-end
-
----@param skull Skull
----@param delta number
-function day:render(skull, delta)
-
-end
-
----@param skull Skull
-function day:exit(skull)
-
 end
