@@ -79,19 +79,16 @@ local function giveHead(name)
             }
         }
     }):gsub('"Id":%[','"Id":[I;'))
-    main_page:newAction():title(name):item(item):onLeftClick(function ()
+    main_page:newAction():title("§7Mode: §a" .. name):item(item):onLeftClick(function ()
         host:setSlot(player:getNbt().SelectedItemSlot, item)
         sounds["entity.item.pickup"]:pos(player:getPos()):play()
     end)
 end
 
-local n_actions = 0
 for _, file in next, listFiles("days") do
-    n_actions = n_actions + 1
     giveHead(file:gsub("days%.",""))
 end
 
-while n_actions % 8 ~= 0 do
-    n_actions = n_actions + 1
+while #main_page:getActions() % 8 ~= 0 do
     main_page:newAction():hoverColor(0,0,0)
 end
