@@ -25,6 +25,7 @@ local function valueToChar(val)
 end
 
 ---@param base64 string
+---@return string?
 function lib.decode(base64)
     if not base64 then return end
     local result = {}
@@ -48,6 +49,7 @@ function lib.decode(base64)
 end
 
 ---@param str string
+---@return string? base64
 function lib.encode(str)
     if not str then return end
     local result = {}

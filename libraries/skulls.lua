@@ -1,8 +1,8 @@
 local Skull = require("libraries.Skull")
 local SkullRenderer = require("libraries.SkullRenderer")
-local Calendar = require("libraries.Calendar")
-local base64 = require("libraries.base64")
+local calendar = require("libraries.Calendar")
 local manager = require("libraries.SkullManager")
+local mode_getter = require("libraries.mode_getter")
 
 local function signText(pos)
     local blockstate = world.getBlockState(pos)
@@ -11,19 +11,11 @@ local function signText(pos)
     end
 end
 
-local function getTextureValue(data)
-    local owner = data and data.SkullOwner
-    local properties = owner and owner.Properties
-    local textures = properties and properties.textures
-    return textures and textures[1] and textures[1].Value
-end
-
 local function chooseDay(blockstate)
-    local texture_value = base64.decode(getTextureValue(blockstate:getEntityData()))
-    return texture_value and Calendar:byName(texture_value)
-        or Calendar:byName(signText(blockstate:getPos() + vec(0, -1, 0)))
-        or Calendar:today()
-        or Calendar:getFallback()
+    return mode_getter.fromBlock(blockstate)
+        or calendar:byName(signText(blockstate:getPos() + vec(0, -1, 0)))
+        or calendar:today()
+        or calendar:getFallback()
 end
 
 function events.SKULL_RENDER(_, blockstate)
