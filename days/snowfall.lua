@@ -2,6 +2,14 @@ local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("snowfall")
 --local snowfallDatabase = {}
 
+local function deepCopy(model)
+  local copy = model:copy(model:getName())
+  for _, child in pairs(copy:getChildren()) do
+      copy:removeChild(child):addChild(deepCopy(child))
+  end
+  return copy
+end
+
 local function reloadSnow(skull)
   for x = -6, 6 do
     for z = -6, 6 do
@@ -17,6 +25,16 @@ local function reloadSnow(skull)
             skull.data.snowfall.snow:newPart("x"..x.."z"..z)
             skull.data.snowfall.snow["x"..x.."z"..z]:addChild(skull.data.snowfall.snow.snow)
             skull.data.snowfall.snow["x"..x.."z"..z]:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
+            if string.find(blockstate.id,"stairs") then
+              skull.data.snowfall.snow["x"..x.."z"..z]:addChild(deepCopy(skull.data.snowfall.snow.stair))
+              skull.data.snowfall.snow["x"..x.."z"..z].stair:setVisible(true)
+              for k,v in pairs({"north","east","south","west"}) do
+                if v == blockstate:getProperties().facing then
+                  skull.data.snowfall.snow["x"..x.."z"..z].stair:setRot(0,(k-1)*-90,0)
+                end
+              end
+              skull.data.snowfall.snow["x"..x.."z"..z].stair:setVisible(true)
+            end
           end
         end
 
