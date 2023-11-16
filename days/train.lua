@@ -101,6 +101,8 @@ local function selectTrackType(blockRot, blockFacing)
       endNode = vec(1, 0, 0) * mat
       rotOffset = rot
    end
+   startNode = (startNode + 0.5):floor()
+   endNode = (endNode + 0.5):floor()
    return trackType, rotOffset, model, startNode, endNode
 end
 
