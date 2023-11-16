@@ -191,7 +191,6 @@ end
 --- when the skull is punched.
 ---@param skull Skull
 function day:punch(skull) -- i dont think i will need it
-   -- log("ouch")
 end
 
 local function renderTrain(skull, time, trainModel, backwards)
@@ -310,7 +309,7 @@ function day:globalTick()
       return
    end
    -- get correct track type
-   local rot = math.round(player:getRot().y / 22.5) % 16
+   local rot = math.round(viewer:getRot().y / 22.5) % 16
    local facing
    if side ~= "up" then facing = side end
    local trackType, rotOffset = selectTrackType(rot, facing)
