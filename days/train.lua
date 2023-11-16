@@ -19,6 +19,13 @@ for _, modelpart in pairs(placeIndicatorModel:getChildren()) do
    modelpart:setVisible(false)
 end
 
+local indicatorOffsets = {
+   vec(0, 0, 1), vec(0, -1, 1),
+   vec(0, 0, -1), vec(0, -1, -1),
+   vec(1, 0, 0), vec(1, -1, 0),
+   vec(-1, 0, 0), vec(-1, -1, 0),
+}
+
 local normals = {
    up = vec(0, 1, 0),
    down = vec(0, -1, 0),
@@ -291,16 +298,12 @@ function day:globalTick()
    if not world.getBlockState(pos):isAir() then
       return
    end
-   -- stop if not touching any other rail
+   -- stop if not next to any other rail
    local touching = false
-   for _, v in pairs(normals) do
-      local neighbourBlock = world.getBlockState(pos + v)
-      if neighbourBlock.id == 'minecraft:player_head' or neighbourBlock.id == 'minecraft:player_wall_head' then
-         local data = neighbourBlock:getEntityData()
-         if data and data.SkullOwner and data.SkullOwner.Id and avatar:getUUID() == client.intUUIDToString(table.unpack(data.SkullOwner.Id)) then
-            touching = true
-            break
-         end
+   for _, v in pairs(indicatorOffsets) do
+      if modeGetter.fromBlock(world.getBlockState(pos + v)) == day then
+         touching = true
+         break
       end
    end
    if not touching then
