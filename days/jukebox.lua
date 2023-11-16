@@ -126,6 +126,10 @@ local instrument = {
 
 local function find_instrument(block)
     if block.id then
+        local data = block:getEntityData()
+        if data and type(data.note_block_sound) == 'string' then
+            return data.note_block_sound
+        end
         for key, value in pairs(instrument) do
             if value(block) then
                 return key
