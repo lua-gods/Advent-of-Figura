@@ -20,10 +20,10 @@ for _, modelpart in pairs(placeIndicatorModel:getChildren()) do
 end
 
 local indicatorOffsets = {
-   vec(0, 0, 1), vec(0, -1, 1),
-   vec(0, 0, -1), vec(0, -1, -1),
-   vec(1, 0, 0), vec(1, -1, 0),
-   vec(-1, 0, 0), vec(-1, -1, 0),
+   vec(0, 0, 1), vec(0, -1, 1), vec(0, 1, 1),
+   vec(0, 0, -1), vec(0, -1, -1), vec(0, 1, -1),
+   vec(1, 0, 0), vec(1, -1, 0), vec(1, 1, 0),
+   vec(-1, 0, 0), vec(-1, -1, 0), vec(-1, 1, 0),
 }
 
 local normals = {
@@ -141,6 +141,8 @@ function day:tick(skull)
             time = 0.5,
             backwards = false,
             speed = trainSpeed,
+            oldWheels = 0,
+            wheels = 0,
             tick = 0
          }
       end
@@ -156,10 +158,13 @@ function day:tick(skull)
       -- adjust speed for some rail types
       if skull.data.trackType == 'rotated' then
          speed = speed * 1.6
-      elseif skull.data.trackType == 'vertical' then
-         speed = speed * (train.backwards and 1.2 or 0.8)
+      elseif skull.data.trackType == 'vertical' and not train.backwards then
+         speed = speed * 0.7
       end
       train.time = train.time + speed
+      -- update wheels
+      train.oldWheels = train.wheels
+      train.wheels = train.wheels - speed * 300
       -- try to move to next rail
       if train.time >= 1 then
          train.oldTime = train.oldTime % 1 - 1
@@ -193,9 +198,8 @@ end
 function day:punch(skull) -- i dont think i will need it
 end
 
-local function renderTrain(skull, time, trainModel, backwards)
+local function renderTrain(skull, time, trainModel, backwards, wheelsRot)
    local rotOffset = skull.data.rotOffset
-   -- time = time / 16 * 17.6
    if skull.data.trackType == 'straight' then
       trainModel:setPos(skull.pos * 16)
       trainModel.start:setPos(0, 0, time * -16)
@@ -229,6 +233,9 @@ local function renderTrain(skull, time, trainModel, backwards)
          trainModel.start:setPos(0, 4 + time, time - 4)
       end
    end
+   trainModel.start.wheels1:setRot(wheelsRot, 0, 0)
+   trainModel.start.wheels2:setRot(wheelsRot, 0, 0)
+   trainModel.start.wheels3:setRot(wheelsRot, 0, 0)
 end
 
 ---@param skull Skull
@@ -240,15 +247,16 @@ function day:render(skull, delta)
    if train then
       trainModel:setVisible(true)
       local time = math.lerp(train.oldTime, train.time, delta)
+      local wheelsRot = math.lerp(train.oldWheels, train.wheels, delta)
       if time < 0 then
          local previousSkull, backwards = getNextTrack(skull, not train.backwards)
          if previousSkull then
-            renderTrain(previousSkull, time + 1, trainModel, not backwards)
+            renderTrain(previousSkull, time + 1, trainModel, not backwards, wheelsRot)
          else
-            renderTrain(skull, time, trainModel, train.backwards)
+            renderTrain(skull, time, trainModel, train.backwards, wheelsRot)
          end
       else
-         renderTrain(skull, time, trainModel, train.backwards)
+         renderTrain(skull, time, trainModel, train.backwards, wheelsRot)
       end
    else
       skull.data.model:setColor()
