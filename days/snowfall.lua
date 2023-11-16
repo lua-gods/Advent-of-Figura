@@ -11,16 +11,22 @@ local function deepCopy(model)
 end
 
 local function reloadSnow(skull)
-  for x = -6, 6 do
-    for z = -6, 6 do
-      if not (x == 0 and z == 0) and math.sqrt(x^2+z^2) < 6 then
-        for y = -6, 6 do
+  for x = -8, 8 do
+    for z = -8, 8 do
+      if not (x == 0 and z == 0) and math.sqrt(x^2+z^2) < 8 then
+        for y = -10, 20 do
           local blockPos = skull.pos+vec(x,y,z)
           local blockstate = world.getBlockState(blockPos) 
           if not blockstate:isAir() and world.getBlockState(blockPos+vec(0,1,0)):isAir() then
             local blockHeight = 0
             if blockstate:getCollisionShape()[1] then
               blockHeight = blockstate:getCollisionShape()[1][2][2]
+            end
+            if not world.getBlockState(blockPos+vec(0,-1,0)):hasCollision() and not blockstate:hasCollision() then
+              blockHeight = blockHeight-1
+            end
+            if string.find(blockstate.id,"head") then
+              blockHeight = 0
             end
             skull.data.snowfall.snow:newPart("x"..x.."z"..z)
             skull.data.snowfall.snow["x"..x.."z"..z]:addChild(skull.data.snowfall.snow.snow)
@@ -53,8 +59,8 @@ end
 
 ---@param skull Skull
 function day:tick(skull)
-  local particlePos = skull.pos + vec(math.random(-6,6),math.random(20,30),math.random(-6,6))
-  if math.sqrt((particlePos.x-skull.pos.x)^2+(particlePos.z-skull.pos.z)^2) < 6 then
+  local particlePos = skull.pos + vec(math.random(-8,8),math.random(20,30),math.random(-8,8))
+  if math.sqrt((particlePos.x-skull.pos.x)^2+(particlePos.z-skull.pos.z)^2) < 8 then
     particles:newParticle("minecraft:snowflake",particlePos):setLifetime(500)
   end
 end
