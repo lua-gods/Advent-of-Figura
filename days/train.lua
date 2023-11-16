@@ -4,6 +4,7 @@ local day = Calendar:newDay("train")
 local skullManager = require("libraries.SkullManager")
 local SkullRenderer = require("libraries.SkullRenderer")
 local deepCopy = require("libraries.deep_copy")
+local modeGetter = require("libraries.mode_getter")
 
 -- settings
 local trainSpeed = 0.15
@@ -18,7 +19,7 @@ for _, modelpart in pairs(placeIndicatorModel:getChildren()) do
    modelpart:setVisible(false)
 end
 
-local sideDirections = {
+local normals = {
    up = vec(0, 1, 0),
    down = vec(0, -1, 0),
    west = vec(-1, 0, 0),
@@ -62,15 +63,11 @@ local function findTrainNearby(skull)
       currentSkull, startNode = getNextTrack(skull, startNode)
       for _ = 1, 16 do
          if not currentSkull or currentSkull.pos == pos then
-            -- print(not currentSkull and 'not found' or 'same pos')
             break
          end
          if currentSkull.data.train then
-            -- print('train found')
             return skull
          end
-
-         -- for _ = 1, 100 do particles['end_rod']:pos(currentSkull.pos + vec(math.random(),math.random(),math.random())):spawn() end
 
          currentSkull, startNode = getNextTrack(currentSkull, startNode)
       end
@@ -101,6 +98,8 @@ local function selectTrackType(blockRot, blockFacing)
       endNode = vec(1, 0, 0) * mat
       rotOffset = rot
    end
+   startNode = (startNode + 0.5):floor()
+   endNode = (endNode + 0.5):floor()
    return trackType, rotOffset, model, startNode, endNode
 end
 
@@ -277,20 +276,24 @@ function day:globalTick()
       placeIndicatorPreviousModel:setVisible(false)
       placeIndicatorPreviousModel = nil
    end
+   -- stop if not holding head
+   if modeGetter.fromItem(viewer:getItem(1)) ~= day then
+      return
+   end
    local block, pos, side = viewer:getTargetedBlock(true, 5)
    -- stop if not looking at block or looking at bottom of block
    if block:isAir() or side == 'down' then
       return
    end
    -- offset pos
-   pos = pos + sideDirections[side] * 0.99
+   pos = pos + normals[side] * 0.99
     -- stop if place block is not air
    if not world.getBlockState(pos):isAir() then
       return
    end
    -- stop if not touching any other rail
    local touching = false
-   for _, v in pairs(sideDirections) do
+   for _, v in pairs(normals) do
       local neighbourBlock = world.getBlockState(pos + v)
       if neighbourBlock.id == 'minecraft:player_head' or neighbourBlock.id == 'minecraft:player_wall_head' then
          local data = neighbourBlock:getEntityData()
