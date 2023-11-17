@@ -69,7 +69,6 @@ local notes = {
     [660] = { 0.749, 1, 0.5, 0.63 },
 }
 
-world:newBlock("minecraft:oak_planks"):getTags()
 ---@type table<string,fun(block : BlockState): boolean?>
 local instrument = {
     ["block.note_block.bass"] = function (block)
@@ -117,11 +116,14 @@ local instrument = {
         local id = block.id  -- LMAO -GN
         if id:find("stone") or id:find("quartz") or id:find("bricks")
         or id:find("coral") or id:find("nylium") or id:find("concrete")
-        or id:find("sanstone") or id:find("ore")
+        or id:find("sandstone") or id:find("ore")
         or id == "minecraft:observer" or id == "minecraft:obsidian"
         or id == "minecraft:netherack"or id == "minecraft:respawn_anchor"
         or id == "minecraft:bedrock" then return true end
-    end
+    end,
+    ["entity.slime.squish"] = function (block) return block.id:find("slime") and true or false end,
+    ["entity.villager.ambient"] = function (block) return block.id:find("lectern") and true or false end,
+    ["block.anvil.land"] = function (block) return block.id:find("anvil") and true or false end
 }
 
 local function find_instrument(block)
