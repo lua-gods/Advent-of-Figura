@@ -1,6 +1,6 @@
 local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("snowfall")
---local snowfallDatabase = {}
+snowfallDatabase = {}
 
 local function deepCopy(model)
   local copy = model:copy(model:getName())
@@ -18,28 +18,36 @@ local function reloadSnow(skull)
           local blockPos = skull.pos+vec(x,y,z)
           local blockstate = world.getBlockState(blockPos) 
           if not blockstate:isAir() and world.getBlockState(blockPos+vec(0,1,0)):isAir() then
-            local blockHeight = 0
-            if blockstate:getCollisionShape()[1] then
-              blockHeight = blockstate:getCollisionShape()[1][2][2]
-            end
-            if not world.getBlockState(blockPos+vec(0,-1,0)):hasCollision() and not blockstate:hasCollision() then
-              blockHeight = blockHeight-1
-            end
-            if string.find(blockstate.id,"head") then
-              blockHeight = 0
-            end
-            skull.data.snowfall.snow:newPart("x"..x.."z"..z)
-            skull.data.snowfall.snow["x"..x.."z"..z]:addChild(skull.data.snowfall.snow.snow)
-            skull.data.snowfall.snow["x"..x.."z"..z]:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
-            if string.find(blockstate.id,"stairs") and blockHeight ~= 1 then
-              skull.data.snowfall.snow["x"..x.."z"..z]:addChild(deepCopy(skull.data.snowfall.snow.stair))
-              skull.data.snowfall.snow["x"..x.."z"..z].stair:setVisible(true)
-              for k,v in pairs({"north","east","south","west"}) do
-                if v == blockstate:getProperties().facing then
-                  skull.data.snowfall.snow["x"..x.."z"..z].stair:setRot(0,(k-1)*-90,0)
-                end
+            if not snowfallDatabase [tostring(blockPos)] then
+              snowfallDatabase[tostring(blockPos)] = {
+                rootSkull = tostring(skull.pos)
+              }
+              local blockHeight = 0
+              if blockstate:getCollisionShape()[1] then
+                blockHeight = blockstate:getCollisionShape()[1][2][2]
               end
-              skull.data.snowfall.snow["x"..x.."z"..z].stair:setVisible(true)
+              if not world.getBlockState(blockPos+vec(0,-1,0)):hasCollision() and not blockstate:hasCollision() then
+                blockHeight = blockHeight-1
+              end
+              if string.find(blockstate.id,"head") then
+                blockHeight = 0
+              end
+              skull.data.snowfall.snow:newPart("x"..x.."z"..z)
+              --- debug
+              skull.data.snowfall.snow:setColor(math.random(0,10)/10,math.random(0,10)/10,math.random(0,10)/10)
+              ---
+              skull.data.snowfall.snow["x"..x.."z"..z]:addChild(skull.data.snowfall.snow.snow)
+              skull.data.snowfall.snow["x"..x.."z"..z]:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
+              if string.find(blockstate.id,"stairs") and blockHeight ~= 1 then
+                skull.data.snowfall.snow["x"..x.."z"..z]:addChild(deepCopy(skull.data.snowfall.snow.stair))
+                skull.data.snowfall.snow["x"..x.."z"..z].stair:setVisible(true)
+                for k,v in pairs({"north","east","south","west"}) do
+                  if v == blockstate:getProperties().facing then
+                    skull.data.snowfall.snow["x"..x.."z"..z].stair:setRot(0,(k-1)*-90,0)
+                  end
+                end
+                skull.data.snowfall.snow["x"..x.."z"..z].stair:setVisible(true)
+              end
             end
           end
         end
@@ -53,7 +61,6 @@ end
 function day:init(skull)
   skull.data.snowfall = skull:addPart(models.snowfall)
   skull.data.snowfall:setRot(0,0,0)
-  --snowfallDatabase[tostring(skull.pos)] = "temp"
   reloadSnow(skull)
 end
 
