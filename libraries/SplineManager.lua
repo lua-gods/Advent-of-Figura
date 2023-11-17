@@ -2,6 +2,7 @@
 ---@field variants ModelPart[]
 ---@field last_pair number
 ---@field skulls Skull[]
+---@field postRender fun(skull: Skull)
 local SplineManager = {}
 SplineManager.__index = SplineManager
 
@@ -100,6 +101,7 @@ function SplineManager:roll(skull)
             end
         end
     end
+    self.postRender(skull)
 end
 
 function SplineManager:pairSkulls()
