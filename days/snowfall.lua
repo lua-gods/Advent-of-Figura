@@ -31,7 +31,7 @@ local function reloadSnow(skull)
             skull.data.snowfall.snow:newPart("x"..x.."z"..z)
             skull.data.snowfall.snow["x"..x.."z"..z]:addChild(skull.data.snowfall.snow.snow)
             skull.data.snowfall.snow["x"..x.."z"..z]:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
-            if string.find(blockstate.id,"stairs") then
+            if string.find(blockstate.id,"stairs") and blockHeight ~= 1 then
               skull.data.snowfall.snow["x"..x.."z"..z]:addChild(deepCopy(skull.data.snowfall.snow.stair))
               skull.data.snowfall.snow["x"..x.."z"..z].stair:setVisible(true)
               for k,v in pairs({"north","east","south","west"}) do
