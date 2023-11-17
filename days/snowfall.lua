@@ -11,6 +11,7 @@ local function deepCopy(model)
 end
 
 local function reloadSnow(skull)
+  snowfallDatabase[tostring(skull.pos)] = {}
   for x = -8, 8 do
     for z = -8, 8 do
       if not (x == 0 and z == 0) and math.sqrt(x^2+z^2) < 8 then
@@ -18,8 +19,14 @@ local function reloadSnow(skull)
           local blockPos = skull.pos+vec(x,y,z)
           local blockstate = world.getBlockState(blockPos) 
           if not blockstate:isAir() and world.getBlockState(blockPos+vec(0,1,0)):isAir() then
-            if not snowfallDatabase [tostring(blockPos)] then
-              snowfallDatabase[tostring(blockPos)] = {
+            local alreadyExists = false
+            for k,v in pairs(snowfallDatabase) do
+              if v[tostring(blockPos)] then
+                alreadyExists = true
+              end
+            end
+            if not alreadyExists then
+              snowfallDatabase[tostring(skull.pos)][tostring(blockPos)] = {
                 rootSkull = tostring(skull.pos)
               }
               local blockHeight = 0
@@ -33,9 +40,9 @@ local function reloadSnow(skull)
                 blockHeight = 0
               end
               skull.data.snowfall.snow:newPart("x"..x.."z"..z)
-              --- debug
+--[[               --- debug
               skull.data.snowfall.snow:setColor(math.random(0,10)/10,math.random(0,10)/10,math.random(0,10)/10)
-              ---
+              --- ]]
               skull.data.snowfall.snow["x"..x.."z"..z]:addChild(skull.data.snowfall.snow.snow)
               skull.data.snowfall.snow["x"..x.."z"..z]:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
               if string.find(blockstate.id,"stairs") and blockHeight ~= 1 then
@@ -86,5 +93,5 @@ end
 
 ---@param skull Skull
 function day:exit(skull)
-
+  snowfallDatabase[tostring(skull.pos)] = nil
 end
