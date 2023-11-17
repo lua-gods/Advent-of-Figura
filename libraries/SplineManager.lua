@@ -2,7 +2,8 @@
 ---@field variants ModelPart[]
 ---@field last_pair number
 ---@field skulls Skull[]
----@field postRender fun(skull: Skull)
+---@field postSkullRender fun(skull: Skull)
+---@field postPartRender fun(part: ModelPart)
 local SplineManager = {}
 SplineManager.__index = SplineManager
 
@@ -80,6 +81,9 @@ function SplineManager:renderSpline(skull, spline, connected)
             local offset = math.lerp(connected.offset, skull.offset, j / #spline)
             local vine = skull:addPart(self.variants[math.random(1, #self.variants)]):pos((point.pos + offset) * 16):rot(dirToAngle((point.pos - spline[j - 1].pos):normalize()))
             processVariant(vine)
+            if self.postPartRender then
+                self.postPartRender(vine)
+            end
         end
     end
 end
@@ -101,7 +105,7 @@ function SplineManager:roll(skull)
             end
         end
     end
-    self.postRender(skull)
+    self.postSkullRender(skull)
 end
 
 function SplineManager:pairSkulls()

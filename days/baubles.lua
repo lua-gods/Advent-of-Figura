@@ -21,7 +21,7 @@ function day:init(skull)
     math.random(); math.random(); math.random()
 end
 
-function manager.postRender(skull)
+function manager.postSkullRender(skull)
     skull:addPart(baubles[math.random(1, #baubles)]):color(vectors.hsvToRGB(rng.float(0,1),1,1))
 end
 
