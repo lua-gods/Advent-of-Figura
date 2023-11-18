@@ -18,10 +18,28 @@ local function chooseDay(blockstate)
         or calendar:getFallback()
 end
 
-function events.SKULL_RENDER(_, blockstate)
+local rendered = {}
+function events.SKULL_RENDER(_, blockstate, itemstack, entity, context)
+    if next(rendered) then
+        for i = #rendered, 1, -1 do
+            rendered[i]:visible(false)
+            rendered[i] = nil
+        end
+        rendered = {}
+    end
+
     if blockstate then
         if not manager:get(blockstate:getPos()) then
             manager:add(Skull.new(blockstate, SkullRenderer.new(), chooseDay(blockstate)))
+        end
+    elseif entity and context == "HEAD" then
+        local day = mode_getter.fromItem(itemstack)
+        if day then
+            day:wornRender(entity)
+            for _, part in pairs(day.worn_parts) do
+                part:visible(true)
+                rendered[#rendered + 1] = part
+            end
         end
     end
 end

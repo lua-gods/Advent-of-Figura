@@ -22,6 +22,7 @@ function SkullManager:get(pos)
 end
 
 ---@param filter? function
+---@return Skull
 function SkullManager:getAll(filter)
     local skulls = {}
     for _, skull in next, self.skulls do
