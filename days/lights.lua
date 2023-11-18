@@ -4,7 +4,7 @@ local tween = require("libraries.GNTweenLib")
 
 ---@class Day.Lights: Day
 ---@field manager SplineManager
-local day = Calendar:newDay("baubles")
+local day = Calendar:newDay("lights")
 
 local manager = SplineManager.new(models.lights.Light:getChildren())
 
