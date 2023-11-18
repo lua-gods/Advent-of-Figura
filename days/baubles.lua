@@ -6,6 +6,12 @@ local tween = require("libraries.GNTweenLib")
 ---@field manager SplineManager
 local day = Calendar:newDay("baubles")
 
+local worn = day:addWornPart(models.baubles.Bauble.a)
+
+function day:wornRender()
+    worn:color(vectors.hsvToRGB((client:getSystemTime() / 5000) % 1,1,1))
+end
+
 local baubles = models.baubles.Bauble:getChildren()
 local manager = SplineManager.new(models.baubles.Vine:getChildren())
 
