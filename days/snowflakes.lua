@@ -61,7 +61,7 @@ function day:init(skull, seed)
     local root = skull:addPart(models:newPart("snowflakes"))
 
     for _ = 1, rng.int(1, 2) do
-        skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(rng.of(variants.core), root):rot(0, rng.step(0, 360, 45) - skull.rot, 0), 0.3 * formation_speed)
+        skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(rng.of(variants.core), root):rot(0, rng.step(0, 360, 45), 0), 0.3 * formation_speed)
     end
 
     for _ = 1, rng.int(1, 2) do
@@ -87,7 +87,7 @@ function day:init(skull, seed)
     end
 
     local wall = skull.is_wall_head and -90 or 0
-    root:rot(wall, skull.rot, 0):pos(skull.render_pos * 16 + skull.offset * 15):light(15,15)
+    root:rot(wall, wall > 0 and skull.rot or 0, 0):pos(skull.render_pos * 16 + skull.offset * 15):light(15,15)
     skull.data.root = root
 end
 
