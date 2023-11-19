@@ -46,7 +46,6 @@ local facingToRot = {
 -- functions
 local function getNextTrack(skull, startNode)
    local nextPos = skull.pos + (startNode and skull.data.startNode or skull.data.endNode)
-   -- nextPos = (nextPos + 0.5):floor()
    local newSkull = skullManager:get(nextPos)
    if not (newSkull and newSkull.data.isTrain) then
       nextPos.y = nextPos.y - 1
