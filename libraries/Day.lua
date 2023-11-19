@@ -50,7 +50,7 @@ function Day:wornRender(entity) end
 ---@return ModelPart copy
 function Day:addWornPart(part)
     local copy = deepCopy(part)
-    copy:visible(true)
+    copy:visible(false)
     models.model.Skull:addChild(copy)
     copy:setParentType("SKULL")
     self.worn_parts[#self.worn_parts + 1] = copy
