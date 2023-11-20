@@ -14,6 +14,7 @@ function Day.new(name)
     return self
 end
 
+------ PER-SKULL
 ---@param skull Skull
 function Day:init(skull) end
 
@@ -27,22 +28,34 @@ function Day:render(skull, delta) end
 ---@param skull Skull
 function Day:exit(skull) end
 
----@param skull Skull
----@param puncher Player
-function Day:punch(skull, puncher) end
-
+------ PER-DAY
 ---@param skulls Skull[]
 function Day:globalInit(skulls) end
 
 ---@param skulls Skull[]
-function Day:globalExit(skulls) end
+function Day:globalTick(skulls) end
 
 ---@param skulls Skull[]
-function Day:globalTick(skulls) end
+function Day:globalExit(skulls) end
+
+------ HELMET ITEM
+---@param entity Entity
+function Day:wornInit(entity) end
+
+---@param entity Entity
+function Day:wornTick(entity) end
 
 ---@param entity Entity
 ---@return ModelPart[]? to_show
 function Day:wornRender(entity) end
+
+---@param entity Entity
+function Day:wornExit(entity) end
+
+------ OTHER
+---@param skull Skull
+---@param puncher Player
+function Day:punch(skull, puncher) end
 
 ---These parts render when the head is worn on an entity. Each part is hidden and shown during skull render, so prefer to use minimal parts.
 ---Provided parts are deep copied.

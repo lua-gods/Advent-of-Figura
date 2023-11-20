@@ -19,6 +19,7 @@ local function chooseDay(blockstate)
 end
 
 local rendered = {}
+local wearing = {}
 function events.SKULL_RENDER(_, blockstate, itemstack, entity, context)
     if next(rendered) then
         for i = #rendered, 1, -1 do
@@ -40,11 +41,13 @@ function events.SKULL_RENDER(_, blockstate, itemstack, entity, context)
                 part:visible(true)
                 rendered[#rendered + 1] = part
             end
+            wearing[entity:getUUID()] = day
         end
     end
 end
 
 local initialized = {}
+local initialized_players = {}
 function events.WORLD_TICK()
     local active = {}
 
@@ -67,6 +70,25 @@ function events.WORLD_TICK()
         else
             day:globalExit(skulls)
             initialized[day] = nil
+        end
+    end
+
+    for uuid, day in next, wearing do
+        local entity = world.getEntity(uuid)
+        if entity then
+            if not initialized_players[uuid] then
+                initialized_players[uuid] = day
+                day:wornInit(entity)
+            end
+            day:wornTick(entity)
+            if entity:getItem(6).id ~= "minecraft:player_head" then
+                wearing[uuid] = nil
+                initialized_players[uuid] = nil
+                day:wornExit(entity)
+            end
+        else
+            wearing[uuid] = nil
+            initialized_players[uuid] = nil
         end
     end
 end
