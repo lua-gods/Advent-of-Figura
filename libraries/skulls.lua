@@ -20,7 +20,7 @@ end
 
 local rendered = {}
 local wearing = {}
-function events.SKULL_RENDER(_, blockstate, itemstack, entity, context)
+function events.SKULL_RENDER(delta, blockstate, itemstack, entity, context)
     if next(rendered) then
         for i = #rendered, 1, -1 do
             rendered[i]:visible(false)
@@ -36,7 +36,7 @@ function events.SKULL_RENDER(_, blockstate, itemstack, entity, context)
     elseif entity and context == "HEAD" then
         local day = mode_getter.fromItem(itemstack)
         if day then
-            day:wornRender(entity)
+            day:wornRender(entity, delta)
             for _, part in pairs(day.worn_parts) do
                 part:visible(true)
                 rendered[#rendered + 1] = part

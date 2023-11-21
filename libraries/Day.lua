@@ -46,8 +46,9 @@ function Day:wornInit(entity) end
 function Day:wornTick(entity) end
 
 ---@param entity Entity
+---@param delta number
 ---@return ModelPart[]? to_show
-function Day:wornRender(entity) end
+function Day:wornRender(entity, delta) end
 
 ---@param entity Entity
 function Day:wornExit(entity) end
