@@ -22,7 +22,6 @@ end
 function Firework:tick()
     if not self.ticking then return end
     self.time = self.time + 1
-    self.pos = self.pos + self.vel
     if self.time >= 50 and math.random() > 0.9 then
         self:blast()
     end

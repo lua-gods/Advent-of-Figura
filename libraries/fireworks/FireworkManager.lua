@@ -1,18 +1,20 @@
 local Firework = require("libraries.fireworks.Firework")
 
 ---@class FireworkManager
+---@field private constructor fun(...):Firework
 ---@field private fireworks Firework[]
 local FireworkManager = {}
 FireworkManager.__index = FireworkManager
 
-function FireworkManager.new()
+function FireworkManager.new(constructor)
     local self = setmetatable({}, FireworkManager)
+    self.constructor = constructor or Firework.new
     self.fireworks = {}
     return self
 end
 
 function FireworkManager:spawn(pos, vel, blast)
-    self:add(Firework.new(pos, vel, blast))
+    self:add(self.constructor(pos, vel, blast))
 end
 
 ---@param firework Firework
