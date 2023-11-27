@@ -5,6 +5,7 @@ local skullManager = require("libraries.SkullManager")
 local SkullRenderer = require("libraries.SkullRenderer")
 local deepCopy = require("libraries.deep_copy")
 local modeGetter = require("libraries.mode_getter")
+day:setItemPart(models.train.train):pos(-3,-3,-5)
 
 -- settings
 local trainSpeed = 0.15
