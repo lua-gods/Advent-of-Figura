@@ -10,7 +10,7 @@ function day:init(skull)
     local part = skull:addPart(models:newPart("text_anchor"))
     skull.data.task = part:newText("Badge")
     :scale(0.1)
-    :pos(0,16,0)
+    :pos(0,24,0)
     :alignment("CENTER")
     :shadow(true)
     :background(true)
@@ -19,7 +19,7 @@ function day:init(skull)
 end
 
 function day:render(skull, delta)
-    skull.data.task:rot(utils.dirToAngle(((skull.pos + vec(0.5,1,0.5)) - client:getCameraPos()):normalize()) + vec(0, skull.rot, 0))
+    skull.data.task:rot(utils.dirToAngle(((skull.pos + vec(0.5,1.5,0.5)) - client:getCameraPos()):normalize()) + vec(0, skull.rot, 0))
 end
 
 function day:tick(skull)
