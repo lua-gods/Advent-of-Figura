@@ -4,6 +4,8 @@ local variants = require("libraries.fireworks.variants")
 local tween = require("libraries.GNTweenLib")
 local day = Calendar:newDay("fireworks")
 
+day:setItemPart(models.fireworks.Barrel)
+
 function day:init(skull)
     skull.data.part = skull:addPart(models.fireworks.Barrel)
     skull.data.fireworks = FireworkManager.new()

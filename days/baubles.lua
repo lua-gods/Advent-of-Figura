@@ -8,6 +8,7 @@ local day = Calendar:newDay("baubles")
 
 local worn = day:addWornPart(models.baubles.Bauble.a)
 
+local item_part = day:setItemPart(models.baubles.Bauble.a)
 function day:wornRender()
     worn:color(vectors.hsvToRGB((client:getSystemTime() / 5000) % 1,1,1))
 end
@@ -17,6 +18,7 @@ local manager = SplineManager.new(models.baubles.Vine:getChildren())
 
 function day:globalTick()
     manager:tick()
+    item_part:rot(0, TIME * 0.5, 0):color(vectors.hsvToRGB((client:getSystemTime() / 5000) % 1,0.8,1))
 end
 
 function day:init(skull)

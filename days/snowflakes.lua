@@ -11,6 +11,29 @@ local variants = {
     arm2 = model.Arm2:getChildren(),
 }
 
+local item_part = day:setItemPart(models:newPart("snowflake_item"))
+local function randomItem()
+    for _, child in pairs(item_part:getChildren()) do
+        item_part:removeChild(child)
+    end
+    item_part:addChild(rng.of(variants.core):copy("core"))
+    local variant1 = rng.of(variants.arm1)
+    local variant2 = rng.of(variants.arm2)
+    for i = 0, 3 do
+        item_part:addChild(variant1:copy("arm1_"..i):rot(0, 90 * i, 0))
+        item_part:addChild(variant2:copy("arm2_"..i):rot(0, 90 * i, 0))
+    end
+    item_part:rot(0,45,0):pos(0,4,0)
+end
+
+randomItem()
+
+function day:globalTick()
+    if TIME % 20 == 0 then
+        randomItem()
+    end
+end
+
 local function tweenIn(part, speed)
     part:scale(0)
     local rot = part:getRot()

@@ -2,6 +2,8 @@ local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("snow_globe")
 local tween = require("libraries.GNTweenLib")
 
+day:setItemPart(models.snow_globe.SnowGlobe)
+
 function day:init(skull)
     skull.data.snow_part = skull:addPart(models.snow_globe.SnowGlobe)
     skull.data.particles = {}

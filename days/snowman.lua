@@ -10,6 +10,13 @@ local variants = {
     bottom = models.snowman.Bottom:getChildren()
 }
 
+local item_variants = {"uwu_pumpkin", "evil_pumpkin", "creeper", "uwu", "carrot", "basic"}
+function day.globalTick()
+    if TIME % 40 == 0 then
+        day:setItemPart(models.snowman.Top[item_variants[math.floor(TIME / 2) % #item_variants + 1]])
+    end
+end
+
 local function processVariant(model)
     local children = model:getChildren()
     for _, child in next, children do
@@ -26,7 +33,7 @@ local function roll(skull)
     skull.renderer:reset()
     local block_above = world.getBlockState(skull.pos + vec(0,1,0))
     local block_below = world.getBlockState(skull.pos + vec(0,-1,0))
-    
+
     local type = "middle"
     if block_above:isAir() then
         type = "top"

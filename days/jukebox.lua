@@ -6,6 +6,8 @@ local tween = require("libraries.GNTweenLib")
 ---@field time integer
 local day = Calendar:newDay("jukebox")
 
+day:setItemPart(models.jukebox)
+
 local notes = {
     [0] = { 1.26, 1.498, 1, 0.5 },
     [15] = { 1.335, 1.682 },

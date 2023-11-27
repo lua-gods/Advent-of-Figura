@@ -73,12 +73,14 @@ function Day:addWornPart(part)
 end
 
 ---@param part ModelPart
+---@return ModelPart copy
 function Day:setItemPart(part)
     local copy = deepCopy(part)
     copy:visible(false)
     models.model.Skull:addChild(copy)
     copy:setParentType("SKULL")
     self.item_part = copy
+    return copy
 end
 
 return Day
