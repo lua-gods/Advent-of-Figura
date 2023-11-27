@@ -39,7 +39,7 @@ local DECEMBER_FIRST = 1701342000000
 local DAY_IN_MS = 86400000
 ---@return Day
 function Calendar:today()
-    local now = client.getSystemTime() + DAY_IN_MS * 30
+    local now = client.getSystemTime()
     if now < DECEMBER_FIRST then
         return self:getFallback()
     end
