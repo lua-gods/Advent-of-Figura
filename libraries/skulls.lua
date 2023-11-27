@@ -18,6 +18,7 @@ local function chooseDay(blockstate)
         or calendar:getFallback()
 end
 
+local item = models.model.item:setParentType("SKULL")
 local rendered = {}
 local wearing = {}
 function events.SKULL_RENDER(delta, blockstate, itemstack, entity, context)
@@ -42,6 +43,15 @@ function events.SKULL_RENDER(delta, blockstate, itemstack, entity, context)
                 rendered[#rendered + 1] = part
             end
             wearing[entity:getUUID()] = day
+        end
+    elseif item then
+        local day = mode_getter.fromItem(itemstack)
+        if day and day.item_part then
+            day.item_part:visible(true)
+            rendered[#rendered + 1] = day.item_part
+        else
+            item:visible(true)
+            rendered[#rendered + 1] = item
         end
     end
 end

@@ -23,9 +23,7 @@ end
 
 local ENTITY_OFFSET = vec(7,-19.5,7)
 local PLAYER_SCALE = math.playerScale ^ 2
-local item = models.model.item:setParentType("SKULL")
 function events.SKULL_RENDER(delta, blockstate, itemstack, entity, context)
-    item:visible(false)
     if blockstate then
         fallback = 0
         if render_skull then
@@ -53,7 +51,6 @@ function events.SKULL_RENDER(delta, blockstate, itemstack, entity, context)
         end
     else
         world_base:visible(false)
-        item:visible(true)
     end
 end
 

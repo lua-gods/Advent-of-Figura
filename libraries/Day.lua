@@ -2,6 +2,7 @@ local deepCopy = require("libraries.deep_copy")
 
 ---@class Day
 ---@field name string
+---@field item_part ModelPart?
 ---@field worn_parts ModelPart[]
 local Day = {}
 Day.__index = Day
@@ -69,6 +70,15 @@ function Day:addWornPart(part)
     copy:setParentType("SKULL")
     self.worn_parts[#self.worn_parts + 1] = copy
     return copy
+end
+
+---@param part ModelPart
+function Day:setItemPart(part)
+    local copy = deepCopy(part)
+    copy:visible(false)
+    models.model.Skull:addChild(copy)
+    copy:setParentType("SKULL")
+    self.item_part = copy
 end
 
 return Day
