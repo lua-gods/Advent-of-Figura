@@ -35,9 +35,15 @@ function Calendar:getFallback()
     return self.days.fallback
 end
 
+local DECEMBER_FIRST = 1701342000000
+local DAY_IN_MS = 86400000
 ---@return Day
 function Calendar:today()
-    return self:byDate(client.getDate().day)
+    local now = client.getSystemTime() + DAY_IN_MS * 30
+    if now < DECEMBER_FIRST then
+        return self:getFallback()
+    end
+    return self:byDate(math.floor((now - DECEMBER_FIRST) / DAY_IN_MS) + 1)
 end
 
 return Calendar.new()
