@@ -24,10 +24,13 @@ local function valueToChar(val)
     return val_to_char_cache[val]
 end
 
+---@type table<string, string>
+local decode_cache = {}
 ---@param base64 string
 ---@return string?
 function lib.decode(base64)
     if not base64 then return end
+    if decode_cache[base64] then return decode_cache[base64] end
     local result = {}
     local value = 0
     local bits = 0
@@ -45,13 +48,17 @@ function lib.decode(base64)
             end
         end
     end
-    return table.concat(result)
+    decode_cache[base64] = table.concat(result)
+    return decode_cache[base64]
 end
 
+---@type table<string, string>
+local encode_cache = {}
 ---@param str string
 ---@return string? base64
 function lib.encode(str)
     if not str then return end
+    if encode_cache[str] then return encode_cache[str] end
     local result = {}
     local value = 0
     local bits = 0
@@ -75,7 +82,8 @@ function lib.encode(str)
     elseif padding == 2 then
         result[#result+1] = "="
     end
-    return table.concat(result)
+    encode_cache[str] = table.concat(result)
+    return encode_cache[str]
 end
 
 assert(lib.decode("SGVsbG8gV29ybGQh") == "Hello World!")

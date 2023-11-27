@@ -13,7 +13,7 @@ end
 
 ---@param data table?
 local function decode(data)
-    local texture_value = base64.decode(getTextureValue(data))
+    local texture_value = base64.decode(getTextureValue(data):gsub(1, 128))
     return calendar:byName(texture_value)
 end
 
