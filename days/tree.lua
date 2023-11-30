@@ -3,6 +3,7 @@ local day = Calendar:newDay("tree")
 
 local skullManager = require("libraries.SkullManager")
 
+local MAX_TREE_SIZE = 64
 
 ---@param skull Skull
 function day:init(skull)
@@ -11,7 +12,7 @@ function day:init(skull)
     skull.data.update = function (offset,recursive)
         -- update feller tree lovers
         skull.data.size = 0
-        for i = -1, -10, -1 do -- get stack
+        for i = -1, -MAX_TREE_SIZE, -1 do -- get stack
             local pos = skull.pos:copy():add(0,i,0)
             if skullManager:has(pos) then
                 local skata = skullManager:get(pos)
@@ -26,7 +27,7 @@ function day:init(skull)
             end
         end
 
-        for i = 1, 10, 1 do -- get stack size
+        for i = 1, MAX_TREE_SIZE, 1 do -- get stack size
             if not skullManager:has(skull.pos:copy():add(0,i,0)) then
                 skull.data.stack = i + (offset or 0)
                 skull.data.size = skull.data.size + i
