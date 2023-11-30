@@ -61,7 +61,7 @@ end
 
 function events.world_render(delta)
   if day.active then
-    local flooredPos = viewer:getPos():floor()
+    local flooredPos = clientPos:floor()
     local time = (TIME + delta) / 100
     for k,pos in pairs(fallingSnowDatabase) do
       for i,j in pairs(groundSnowDatabase) do
