@@ -7,14 +7,6 @@ local groundSnowDatabase = {}
 local fallingSnowDatabase = {}
 local clientPos = nil
 
-local function deepCopy(model)
-  local copy = model:copy(model:getName())
-  for _, child in pairs(copy:getChildren()) do
-      copy:removeChild(child):addChild(deepCopy(child))
-  end
-  return copy
-end
-
 function day:globalInit(skull)
   clientPos = client.getViewer():getPos()
   renderer:addPart(models.customRain)
@@ -25,7 +17,7 @@ function day:globalInit(skull)
   end
   for x = -10, 10 do
     for z = -10, 10 do
-      if math.sqrt(x^2+z^2) < 10 and not (x == 0 and z == 0) then
+      if x^2+z^2 < 100 and not (x == 0 and z == 0) then
         customRain:newPart(tostring(vec(x,z)))
         :setPos((x)*16,160,(z)*16)
         :setPivot(-8,0,-8)
@@ -38,7 +30,6 @@ function day:globalInit(skull)
   end
   models.customRain:setVisible(true)
   customRain:removeChild(customRain.template)
-
 end
 
 function day:globalExit(skulls)
@@ -47,19 +38,22 @@ end
 
 function day:globalTick(skulls)
   clientPos = client.getViewer():getPos()
-  models.customRain:setPos((math.floor(clientPos.x)+0.5)*16,(math.floor(clientPos.y)+0.5)*16,(math.floor(clientPos.z)+0.5)*16)
+  models.customRain:setPos(clientPos:copy():floor():offset(0.5):scale(16))
+  local flooredPos = clientPos:copy():floor()
+  local fX = flooredPos.x
+  local fZ = flooredPos.z
   for k,v in pairs(customRain:getChildren()) do
     v:setVisible(false)
   end
   for x = -10, 10 do
     for z = -10, 10 do
-      if math.sqrt(x^2+z^2) < 10 and not (x == 0 and z == 0) then
-        local pos = vec(math.floor(clientPos.x)+x,math.floor(clientPos.z)+z)
+      if x^2+z^2 < 100 and not (x == 0 and z == 0) then
+        local pos = vec(fX+x,fZ+z)
         for k,v in pairs(groundSnowDatabase) do
-          if v[tostring(pos)] then
-            customRain[tostring(vec(x,z))]:setVisible(true)
-            local scale = math.clamp((math.floor(clientPos.y) - v[tostring(pos)].headPos.y + 10)/20,0,1)
-            customRain[tostring(vec(x,z))]:setScale(1,scale,1)
+          local val = v[tostring(pos)]
+          if val then
+            local scale = math.clamp((math.floor(clientPos.y) - val.headPos.y + 10)/20,0,1)
+            customRain[tostring(vec(x,z))]:setVisible(true):setScale(1,scale,1)
           end
         end
       end
@@ -68,31 +62,38 @@ function day:globalTick(skulls)
 end
 
 function events.world_render(delta)
+  local flooredPos = viewer:getPos():floor()
+  local time = (TIME + delta) / 100
   for k,pos in pairs(fallingSnowDatabase) do
     for i,j in pairs(groundSnowDatabase) do
-      local snowID = vec(math.floor(clientPos.x) + pos.x,math.floor(clientPos.z) + pos.y)
-      if j[tostring(snowID)] then
-        local floorSnow = j[tostring(snowID)]
+      local snowID = vec(flooredPos.x + pos.x, flooredPos.z + pos.y)
+      local jVal = j[tostring(snowID)]
+      if jVal then
+        local floorSnow = jVal
         local fallingSnow = customRain[k]
         local scale = fallingSnow:getScale().y
         local vel = floorSnow.snowVel
-        fallingSnow:setUVMatrix(matrices.scale3(1,5*scale,1):translate((TIME+delta)/100*vel.x,(TIME+delta)/100*vel.y))
+        fallingSnow:setUVMatrix(matrices.scale3(1,5*scale,1):translate(time*vel.x,time*vel.y))
       end
     end
   end
 end
 
+local facing_directions = {"north","east","south","west"}
 local function reloadSnow(skull)
+  local snow_part = skull.data.snowfall.snow
+  local snow_template = skull.data.snowfall.templates.snow
+
   groundSnowDatabase[tostring(skull.pos)] = {}
-  log('reloaded')
-  log(skull.data.snowfall.snow:getChildren())
   for k,v in pairs(skull.data.snowfall.snow:getChildren()) do
-    skull.data.snowfall.snow:removeChild(v)
+    snow_part:removeChild(v)
   end
-  log(skull.data.snowfall.snow:getChildren())
+
+  math.randomseed(skull.pos.x * 56093 + skull.pos.y * 49663 + skull.pos.z * 92791)
+
   for x = -8, 8 do
     for z = -8, 8 do
-      if not (x == 0 and z == 0) and math.sqrt(x^2+z^2) < 8 then
+      if not (x == 0 and z == 0) and x^2+z^2 < 64 then
         for y = -20, 10 do
           y = -y
           local blockPos = skull.pos+vec(x,y,z)
@@ -108,12 +109,12 @@ local function reloadSnow(skull)
               groundSnowDatabase[tostring(skull.pos)][tostring(vec(blockPos.x,blockPos.z))] = {
                 snowPos = vec(x,y,z),
                 headPos = blockPos,
-                snowVel = vec(bit32.rrotate(blockPos.x+blockPos.z,16) % 200/100 - 1,(bit32.rrotate(blockPos.x+blockPos.z,15) % 200/200 - 2)/2),
+                snowVel = vec(rng.float(-1, 1), rng.float(-1, -0.5)),
                 snowScale = 1
               }
               local blockHeight = 0
               if blockstate:getCollisionShape()[1] then
-                blockHeight = blockstate:getCollisionShape()[1][2][2]
+                blockHeight = blockstate:getCollisionShape()[1][2].y
               end
               if not world.getBlockState(blockPos+vec(0,-1,0)):hasCollision() and not blockstate:hasCollision() then
                 blockHeight = blockHeight-1
@@ -121,30 +122,24 @@ local function reloadSnow(skull)
               if string.find(blockstate.id,"head") then
                 blockHeight = 0
               end
-              skull.data.snowfall.snow:newPart(tostring(vec(x,z)))
---[[               --- debug
-              skull.data.snowfall.snow:setColor(math.random(0,10)/10,math.random(0,10)/10,math.random(0,10)/10)
-              --- ]]
-              skull.data.snowfall.snow[tostring(vec(x,z))]:addChild(skull.data.snowfall.templates.snow)
-              skull.data.snowfall.snow[tostring(vec(x,z))]:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
-              if string.find(blockstate.id,"stairs") and blockHeight ~= 1 then
-                skull.data.snowfall.snow[tostring(vec(x,z))]:addChild(skull.data.snowfall.templates.stair:copy("stair"))
-                skull.data.snowfall.snow[tostring(vec(x,z))].stair:setVisible(true)
-                for k,v in pairs({"north","east","south","west"}) do
-                  if v == blockstate:getProperties().facing then
-                    skull.data.snowfall.snow[tostring(vec(x,z))].stair:setRot(0,(k-1)*-90,0)
+              local part = snow_part:newPart(tostring(vec(x,z)))
+              part:addChild(snow_template)
+              part:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
+              if blockHeight ~= 1 and blockstate.id:find("stairs") then
+                part:addChild(skull.data.snowfall.templates.stair:copy("stair"))
+                part.stair:setVisible(true)
+                for i = 0, 3 do
+                  if facing_directions[i + 1] == blockstate:getProperties().facing then
+                    part.stair:setRot(0,i*-90,0)
                   end
                 end
-                skull.data.snowfall.snow[tostring(vec(x,z))].stair:setVisible(true)
               end
             end
           end
         end
-
       end
     end
   end
-  log(skull.data.snowfall.snow:getChildren())
 end
 
 ---@param skull Skull
