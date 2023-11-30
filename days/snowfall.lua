@@ -84,6 +84,12 @@ end
 
 local function reloadSnow(skull)
   groundSnowDatabase[tostring(skull.pos)] = {}
+  log('reloaded')
+  log(skull.data.snowfall.snow:getChildren())
+  for k,v in pairs(skull.data.snowfall.snow:getChildren()) do
+    skull.data.snowfall.snow:removeChild(v)
+  end
+  log(skull.data.snowfall.snow:getChildren())
   for x = -8, 8 do
     for z = -8, 8 do
       if not (x == 0 and z == 0) and math.sqrt(x^2+z^2) < 8 then
@@ -119,10 +125,10 @@ local function reloadSnow(skull)
 --[[               --- debug
               skull.data.snowfall.snow:setColor(math.random(0,10)/10,math.random(0,10)/10,math.random(0,10)/10)
               --- ]]
-              skull.data.snowfall.snow[tostring(vec(x,z))]:addChild(skull.data.snowfall.snow.snow)
+              skull.data.snowfall.snow[tostring(vec(x,z))]:addChild(skull.data.snowfall.templates.snow)
               skull.data.snowfall.snow[tostring(vec(x,z))]:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
               if string.find(blockstate.id,"stairs") and blockHeight ~= 1 then
-                skull.data.snowfall.snow[tostring(vec(x,z))]:addChild(skull.data.snowfall.snow.stair:copy("stair"))
+                skull.data.snowfall.snow[tostring(vec(x,z))]:addChild(skull.data.snowfall.templates.stair:copy("stair"))
                 skull.data.snowfall.snow[tostring(vec(x,z))].stair:setVisible(true)
                 for k,v in pairs({"north","east","south","west"}) do
                   if v == blockstate:getProperties().facing then
@@ -138,6 +144,7 @@ local function reloadSnow(skull)
       end
     end
   end
+  log(skull.data.snowfall.snow:getChildren())
 end
 
 ---@param skull Skull
