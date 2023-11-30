@@ -45,35 +45,35 @@ function day:globalTick(skulls)
   for k,v in pairs(customRain:getChildren()) do
     v:setVisible(false)
   end
-  for x = -10, 10 do
-    for z = -10, 10 do
-      if x^2+z^2 < 100 and not (x == 0 and z == 0) then
-        local pos = vec(fX+x,fZ+z)
-        for k,v in pairs(groundSnowDatabase) do
-          local val = v[tostring(pos)]
-          if val then
-            local scale = math.clamp((math.floor(clientPos.y) - val.headPos.y + 10)/20,0,1)
-            customRain[tostring(vec(x,z))]:setVisible(true):setScale(1,scale,1)
-          end
-        end
+  for i,j in pairs(fallingSnowDatabase) do
+    local x = j.x
+    local z = j.y
+    local pos = vec(fX+x,fZ+z)
+    for k,v in pairs(groundSnowDatabase) do
+      local val = v[tostring(pos)]
+      if val then
+        local scale = math.clamp((math.floor(clientPos.y) - val.headPos.y + 10)/20,0,1)
+        customRain[tostring(vec(x,z))]:setVisible(true):setScale(1,scale,1)
       end
     end
   end
 end
 
 function events.world_render(delta)
-  local flooredPos = viewer:getPos():floor()
-  local time = (TIME + delta) / 100
-  for k,pos in pairs(fallingSnowDatabase) do
-    for i,j in pairs(groundSnowDatabase) do
-      local snowID = vec(flooredPos.x + pos.x, flooredPos.z + pos.y)
-      local jVal = j[tostring(snowID)]
-      if jVal then
-        local floorSnow = jVal
-        local fallingSnow = customRain[k]
-        local scale = fallingSnow:getScale().y
-        local vel = floorSnow.snowVel
-        fallingSnow:setUVMatrix(matrices.scale3(1,5*scale,1):translate(time*vel.x,time*vel.y))
+  if day.active then
+    local flooredPos = viewer:getPos():floor()
+    local time = (TIME + delta) / 100
+    for k,pos in pairs(fallingSnowDatabase) do
+      for i,j in pairs(groundSnowDatabase) do
+        local snowID = vec(flooredPos.x + pos.x, flooredPos.z + pos.y)
+        local jVal = j[tostring(snowID)]
+        if jVal then
+          local floorSnow = jVal
+          local fallingSnow = customRain[k]
+          local scale = fallingSnow:getScale().y
+          local vel = floorSnow.snowVel
+          fallingSnow:setUVMatrix(matrices.scale3(1,5*scale,1):translate(time*vel.x,time*vel.y))
+        end
       end
     end
   end
