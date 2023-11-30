@@ -71,6 +71,7 @@ function events.WORLD_TICK()
         if not initialized[day] then
             initialized[day] = skulls
             day:globalInit(skulls)
+            day.active = true
         end
     end
     
@@ -80,6 +81,7 @@ function events.WORLD_TICK()
         else
             day:globalExit(skulls)
             initialized[day] = nil
+            day.active = false
         end
     end
 
