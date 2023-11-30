@@ -4,6 +4,6 @@ IS_HOST = host:isHost()
 TIME = 0
 DATE = nil
 
-function events.TICK()
+function events.WORLD_TICK()
     TIME = TIME + 1
 end

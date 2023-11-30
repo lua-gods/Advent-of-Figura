@@ -67,7 +67,7 @@ function day:globalTick(skulls)
   end
 end
 
-function events.render(delta)
+function events.world_render(delta)
   for k,pos in pairs(fallingSnowDatabase) do
     for i,j in pairs(groundSnowDatabase) do
       local snowID = vec(math.floor(clientPos.x) + pos.x,math.floor(clientPos.z) + pos.y)
