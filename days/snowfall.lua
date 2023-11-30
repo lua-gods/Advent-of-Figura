@@ -102,6 +102,8 @@ function events.world_render(delta)
 end
 
 local facing_directions = {"north","east","south","west"}
+-- does checking for so many blocks add a lot of instructions on reload? Yes. Do I care? No. Polish is nice ok ;w;
+local denyList = {"head","fence","wall","door","pane","bars","chain","candle","pot","pickle","dragon","bamboo","lily","drip","lantern"}
 local function reloadSnow(skull)
   local snow_part = skull.data.snowfall.snow
   local snow_template = skull.data.snowfall.templates.snow
@@ -119,8 +121,19 @@ local function reloadSnow(skull)
         for y = -20, 10 do
           y = -y
           local blockPos = skull.pos+vec(x,y,z)
-          local blockstate = world.getBlockState(blockPos) 
-          if not blockstate:isAir() and world.getBlockState(blockPos+vec(0,1,0)):isAir() then
+          local blockstate = world.getBlockState(blockPos)
+          local aboveBlockstate = world.getBlockState(blockPos+vec(0,1,0))
+          local isDenyListed = false
+          local isDenyListedAbove = false
+          for k,v in pairs(denyList) do
+            if string.find(blockstate.id,v) then
+              isDenyListed = true
+            end
+            if string.find(aboveBlockstate.id,v) then
+              isDenyListedAbove = true
+            end
+          end
+          if (blockstate:hasCollision() and not (blockstate.id == "minecraft:light" or isDenyListed)) and (not aboveBlockstate:hasCollision() or aboveBlockstate.id == "minecraft:light" or isDenyListedAbove) then
             local alreadyExists = false
             for k,v in pairs(groundSnowDatabase) do
               if v[tostring(vec(blockPos.x,blockPos.z))] then
@@ -137,12 +150,6 @@ local function reloadSnow(skull)
               local blockHeight = 0
               if blockstate:getCollisionShape()[1] then
                 blockHeight = blockstate:getCollisionShape()[1][2].y
-              end
-              if not world.getBlockState(blockPos+vec(0,-1,0)):hasCollision() and not blockstate:hasCollision() then
-                blockHeight = blockHeight-1
-              end
-              if string.find(blockstate.id,"head") then
-                blockHeight = 0
               end
               local part = snow_part:newPart(tostring(vec(x,z)))
               part:addChild(snow_template)
