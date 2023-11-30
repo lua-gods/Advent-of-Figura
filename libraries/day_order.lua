@@ -6,7 +6,7 @@ return {
     "jukebox", -- 4P5
     "door_wreath", -- Chloe
     "christmas_hat", -- Auria
-    nil, -- NO TOUCHY
+    "tree", -- GN & Slyme
     "snow_globe", -- 4P5
     "baubles", -- 4P5
     "snowflakes", -- 4P5
