@@ -35,7 +35,7 @@ function Calendar:getFallback()
     return self.days.fallback
 end
 
-local DECEMBER_FIRST = 1701342000000
+local DECEMBER_FIRST = 1701388800000
 local DAY_IN_MS = 86400000
 ---@return Day
 function Calendar:today()
