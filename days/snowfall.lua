@@ -102,6 +102,8 @@ function events.world_render(delta)
 end
 
 local facing_directions = {"north","east","south","west"}
+-- does checking for so many blocks add a lot of instructions on reload? Yes. Do I care? No. Polish is nice ok ;w;
+local denyList = {"head","fence","wall","door","pane","bars","chain","candle","pot","pickle","dragon","bamboo","lily","drip","lantern"}
 local function reloadSnow(skull)
   local snow_part = skull.data.snowfall.snow
   local snow_template = skull.data.snowfall.templates.snow
@@ -119,8 +121,19 @@ local function reloadSnow(skull)
         for y = -20, 10 do
           y = -y
           local blockPos = skull.pos+vec(x,y,z)
-          local blockstate = world.getBlockState(blockPos) 
-          if not blockstate:isAir() and world.getBlockState(blockPos+vec(0,1,0)):isAir() then
+          local blockstate = world.getBlockState(blockPos)
+          local aboveBlockstate = world.getBlockState(blockPos+vec(0,1,0))
+          local isDenyListed = false
+          local isDenyListedAbove = false
+          for k,v in pairs(denyList) do
+            if string.find(blockstate.id,v) then
+              isDenyListed = true
+            end
+            if string.find(aboveBlockstate.id,v) then
+              isDenyListedAbove = true
+            end
+          end
+          if (blockstate:hasCollision() and not (blockstate.id == "minecraft:light" or isDenyListed)) and (not aboveBlockstate:hasCollision() or aboveBlockstate.id == "minecraft:light" or isDenyListedAbove) then
             local alreadyExists = false
             for k,v in pairs(groundSnowDatabase) do
               if v[tostring(vec(blockPos.x,blockPos.z))] then
@@ -138,21 +151,44 @@ local function reloadSnow(skull)
               if blockstate:getCollisionShape()[1] then
                 blockHeight = blockstate:getCollisionShape()[1][2].y
               end
-              if not world.getBlockState(blockPos+vec(0,-1,0)):hasCollision() and not blockstate:hasCollision() then
-                blockHeight = blockHeight-1
-              end
-              if string.find(blockstate.id,"head") then
-                blockHeight = 0
-              end
               local part = snow_part:newPart(tostring(vec(x,z)))
               part:addChild(snow_template)
               part:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
               if blockHeight ~= 1 and blockstate.id:find("stairs") then
-                part:addChild(skull.data.snowfall.templates.stair:copy("stair"))
-                part.stair:setVisible(true)
-                for i = 0, 3 do
-                  if facing_directions[i + 1] == blockstate:getProperties().facing then
-                    part.stair:setRot(0,i*-90,0)
+                local shape = blockstate:getProperties().shape
+                if not string.find(shape,"outer") then
+                  part:addChild(skull.data.snowfall.templates.stair:copy("stair"))
+                  part.stair:setVisible(true)
+                  for i = 0, 3 do
+                    if facing_directions[i + 1] == blockstate:getProperties().facing then
+                      part.stair:setRot(0,i*-90,0)
+                    end
+                  end
+                end
+                if string.find(shape, "outer") then
+                  local mod = 0
+                  if shape == "outer_right" then
+                    mod = 90
+                  end
+                  part:addChild(skull.data.snowfall.templates.stair2:copy("stair2"))
+                  part.stair2:setVisible(true)
+                  for i = 0, 3 do
+                    if facing_directions[i + 1] == blockstate:getProperties().facing then
+                      part.stair2:setRot(0,i*-90-mod,0)
+                    end
+                  end
+                end
+                if string.find(shape,"inner") then
+                  local mod = 0
+                  if shape == "inner_left" then
+                    mod = 90
+                  end
+                  part:addChild(skull.data.snowfall.templates.stair2:copy("stair2"))
+                  part.stair2:setVisible(true)
+                  for i = 0, 3 do
+                    if facing_directions[i + 1] == blockstate:getProperties().facing then
+                      part.stair2:setRot(0,i*-90+180-mod,0)
+                    end
                   end
                 end
               end
