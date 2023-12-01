@@ -155,11 +155,40 @@ local function reloadSnow(skull)
               part:addChild(snow_template)
               part:setPos(x*16,(blockPos.y+blockHeight-skull.pos.y)*16,z*16)
               if blockHeight ~= 1 and blockstate.id:find("stairs") then
-                part:addChild(skull.data.snowfall.templates.stair:copy("stair"))
-                part.stair:setVisible(true)
-                for i = 0, 3 do
-                  if facing_directions[i + 1] == blockstate:getProperties().facing then
-                    part.stair:setRot(0,i*-90,0)
+                local shape = blockstate:getProperties().shape
+                if not string.find(shape,"outer") then
+                  part:addChild(skull.data.snowfall.templates.stair:copy("stair"))
+                  part.stair:setVisible(true)
+                  for i = 0, 3 do
+                    if facing_directions[i + 1] == blockstate:getProperties().facing then
+                      part.stair:setRot(0,i*-90,0)
+                    end
+                  end
+                end
+                if string.find(shape, "outer") then
+                  local mod = 0
+                  if shape == "outer_right" then
+                    mod = 90
+                  end
+                  part:addChild(skull.data.snowfall.templates.stair2:copy("stair2"))
+                  part.stair2:setVisible(true)
+                  for i = 0, 3 do
+                    if facing_directions[i + 1] == blockstate:getProperties().facing then
+                      part.stair2:setRot(0,i*-90-mod,0)
+                    end
+                  end
+                end
+                if string.find(shape,"inner") then
+                  local mod = 0
+                  if shape == "inner_left" then
+                    mod = 90
+                  end
+                  part:addChild(skull.data.snowfall.templates.stair2:copy("stair2"))
+                  part.stair2:setVisible(true)
+                  for i = 0, 3 do
+                    if facing_directions[i + 1] == blockstate:getProperties().facing then
+                      part.stair2:setRot(0,i*-90+180-mod,0)
+                    end
                   end
                 end
               end
