@@ -10,7 +10,7 @@ return {
     "snow_globe", -- 4P5
     "baubles", -- 4P5
     "snowflakes", -- 4P5
-    nil,
+    "lights", -- 4P5 & Chloe
     nil,
     nil,
     nil,
