@@ -16,12 +16,15 @@ local effects = {
     end,
 }
 
+local model_variants = models.presents.Present:getChildren()
+
 ---@param skull Skull
 function day:init(skull)
     skull.data.fireworks = FireworkManager.new()
     math.randomseed(skull.pos.x * 3 + skull.pos.z * 5 + skull.pos.y * 7)
     math.random(); math.random(); math.random()
     skull.data.effect = rng.of(effects)
+    skull:addPart(rng.of(model_variants))
 end
 
 ---@param skull Skull
