@@ -4,6 +4,7 @@
 ---@field skulls Skull[]
 ---@field postSkullRender fun(skull: Skull)
 ---@field postPartRender fun(part: ModelPart)
+---@field parts ModelPart[]
 local SplineManager = {}
 SplineManager.__index = SplineManager
 
@@ -84,6 +85,7 @@ function SplineManager:renderSpline(skull, spline, connected)
             if self.postPartRender then
                 self.postPartRender(vine)
             end
+            self.parts[#self.parts + 1] = vine
         end
     end
 end
@@ -109,6 +111,7 @@ function SplineManager:roll(skull)
 end
 
 function SplineManager:pairSkulls()
+    self.parts = {}
     for i = 1, #self.skulls do
         local skull = self.skulls[i]
         local first_closest, second_closest
