@@ -17,7 +17,7 @@ function MiniFirework:move()
 end
 
 local MINECRAFT_SPEED_OF_SOUND = 40
-function Firework:blast()
+function MiniFirework:blast()
     self.blahaj_blast(self.pos)
     delay(function ()
         sounds["entity.firework_rocket.blast_far"]:pos(self.pos):volume(0.1):pitch(rng.float(1.8,2)):subtitle("Firework detonates"):play()
