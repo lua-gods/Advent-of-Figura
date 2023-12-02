@@ -36,22 +36,7 @@ function day:globalExit(skulls)
   renderer:reset()
 end
 
-local function getVector(inputString)
-  local numbers = {}
-  for number in inputString:gmatch("%d+") do
-      table.insert(numbers, tonumber(number))
-  end
-  return vec(numbers[1],numbers[2],numbers[3])
-end
-
 function day:globalTick(skulls)
-  local inRangeHeads = {}
-  for k,v in pairs(groundSnowDatabase) do
-    local headPos = getVector(k) - clientPos:floor()
-    if headPos.x^2 + headPos.z^2 < 324 then
-      table.insert(inRangeHeads,k)
-    end
-  end
   clientPos = client.getViewer():getPos()
   models.customRain:setPos(clientPos:copy():floor():offset(0.5):scale(16))
   local flooredPos = clientPos:copy():floor()
@@ -64,8 +49,8 @@ function day:globalTick(skulls)
     local x = j.x
     local z = j.y
     local pos = vec(fX+x,fZ+z)
-    for k,v in pairs(inRangeHeads) do
-      local val = groundSnowDatabase[v][tostring(pos)]
+    for k,v in pairs(groundSnowDatabase) do
+      local val = v[tostring(pos)]
       if val then
         local scale = math.clamp((math.floor(clientPos.y) - val.headPos.y + 10)/20,0,1)
         customRain[tostring(vec(x,z))]:setVisible(true):setScale(1,scale,1)
@@ -78,17 +63,10 @@ function events.world_render(delta)
   if day.active then
     local flooredPos = clientPos:floor()
     local time = (TIME + delta) / 100
-     local inRangeHeads = {}
-    for k,v in pairs(groundSnowDatabase) do
-      local headPos = getVector(k) - clientPos:floor()
-      if headPos.x^2 + headPos.z^2 < 324 then
-        table.insert(inRangeHeads,k)
-      end
-    end
     for k,pos in pairs(fallingSnowDatabase) do
-      for i,j in pairs(inRangeHeads) do
+      for i,j in pairs(groundSnowDatabase) do
         local snowID = vec(flooredPos.x + pos.x, flooredPos.z + pos.y)
-        local jVal = groundSnowDatabase[j][tostring(snowID)]
+        local jVal = j[tostring(snowID)]
         if jVal then
           local floorSnow = jVal
           local fallingSnow = customRain[k]
