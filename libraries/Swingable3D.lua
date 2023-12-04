@@ -51,7 +51,7 @@ function Swingable3D:tick(input_velocity)
     local colliding, normal = self:isColliding()
     if colliding then
         local reflect_dir = reflect(velocity, normal)
-        local damping = 0.5
+        local damping = 0.8
         local vel = -reflect_dir * damping
         
         self._pos = self.pos:copy()

@@ -36,7 +36,7 @@ function day:init(skull)
 
     local anchor = findAnchor(skull.pos)
     local offset = skull.pos - anchor
-    part:pos((skull.render_pos - offset) * 16)
+    part:pos((skull.pos - offset) * 16)
 
     local bauble = deepCopy(baubles[math.random(1, #baubles)]):color(vectors.hsvToRGB(rng.float(0,1),1,1))
     bauble:pos(0,offset.y * 16,0)
@@ -58,13 +58,13 @@ end
 function day:tick(skull)
     if not skull.data.swingable then return end
     skull.data.swingable:tick(skull.data.wind)
-    skull.data.wind = skull.data.wind * 0
+    skull.data.wind = skull.data.wind * 0.8
 end
 
 function day:punch(skull, puncher)
     if not skull.data.swingable then return end
     if puncher:getHeldItem().id:find("head") then return end
-    skull.data.wind = skull.data.wind - (puncher:getPos():add(0,puncher:getEyeHeight(),0) - (skull.render_pos + vec(0.5,0.5,0.5))):normalize() * 0.1
+    skull.data.wind = skull.data.wind - (puncher:getPos():add(0,puncher:getEyeHeight(),0) - (skull.render_pos + vec(0.5,0.5,0.5))):normalize() * 0.02
 end
 
 function day:render(skull, delta)
