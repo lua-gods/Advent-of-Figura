@@ -49,6 +49,7 @@ function day:init(skull)
         swingable._pos = swingable.pos
         swingable.rot = rng.vec3()
         swingable._rot = swingable.rot
+        swingable.offset = offset.y
         skull.data.swingable = swingable
         skull.data.wind = vec(0,0,0)
     end, 1)
@@ -56,8 +57,8 @@ end
 
 function day:tick(skull)
     if not skull.data.swingable then return end
-    skull.data.wind = skull.data.wind * 0.8
     skull.data.swingable:tick(skull.data.wind)
+    skull.data.wind = skull.data.wind * 0
 end
 
 function day:punch(skull, puncher)

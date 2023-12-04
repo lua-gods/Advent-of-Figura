@@ -1,4 +1,4 @@
-local AIR_RESISTANCE = 0.15
+local AIR_RESISTANCE = 0.05
 local GRAVITY = -9.81
 local SIM_SPEED = 5
 
@@ -10,6 +10,7 @@ local SIM_SPEED = 5
 ---@field _rot Vector3
 ---@field equilibrium Vector3
 ---@field spring number
+---@field offset number
 local Swingable3D = {}
 Swingable3D.__index = Swingable3D
 
@@ -23,7 +24,12 @@ function Swingable3D.new(part)
     self.rot = vec(0,0,0)
     self.equilibrium = vec(0,1,0)
     self.spring = 0
+    self.offset = 0
     return self
+end
+
+local function reflect(velocity, normal)
+    return velocity - 2 * velocity:dot(normal) * normal
 end
 
 ---@param input_velocity Vector3
@@ -41,8 +47,18 @@ function Swingable3D:tick(input_velocity)
 
     velocity = velocity + vec(0, GRAVITY * ((dt * 1.3 * SIM_SPEED)^2), 0)
 
-    self._pos = self.pos:copy()
-    self.pos = self.pos + velocity * dt
+    local colliding, normal = self:isColliding()
+    if colliding then
+        local reflect_dir = reflect(velocity, normal)
+        local damping = 0.5
+        self.velocity = -reflect_dir * damping
+        
+        self._pos = self.pos:copy()
+        self.pos = self.pos + self.velocity * dt
+    else
+        self._pos = self.pos:copy()
+        self.pos = self.pos + velocity * dt
+    end
 
     local direction = self.pos - base
     self.pos = base + direction:normalized()
@@ -54,6 +70,82 @@ function Swingable3D:tick(input_velocity)
 
     self._rot = self.rot:copy()
     self.rot = vec(pitch, 0, yaw)
+end
+
+local function drawBounds(min, max, lifetime)
+    local size = max - min
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,0,0)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,0,size.z)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,size.y,0)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,size.y,size.z)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,0,0)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,0,size.z)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,size.y,0)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,size.y,size.z)):spawn()
+end
+
+function Swingable3D:getBounds()
+    local pos = self.part:partToWorldMatrix():apply(0,(self.offset + 0.25) * 16,0)
+    local size = 0.5
+    local half = size / 2
+    local min = pos - vec(half, half, half)
+    local max = pos + vec(half, half, half)
+    drawBounds(min, max, 1)
+    return min, max
+end
+
+function Swingable3D:isColliding()
+    local min, max = self:getBounds()
+    local search_min = min:copy():floor()
+    local search_max = max:copy():floor()
+    local collision_normal = vec(0, 0, 0)
+    local max_penetration_depth = 0
+
+    for x = search_min.x, search_max.x do
+        for y = search_min.y, search_max.y do
+            for z = search_min.z, search_max.z do
+                local block_pos = vec(x, y, z)
+                local block = world.getBlockState(block_pos)
+                if block:getPos().x_z ~= self.pos.x_z:floor() then
+                    local boxes = block:getCollisionShape()
+                    for i = 1, #boxes do
+                        local box = boxes[i]
+                        local box_min = box[1] + block_pos
+                        local box_max = box[2] + block_pos
+                        drawBounds(box_min, box_max, 10)
+                        if not (box_max.x <= min.x or max.x <= box_min.x or
+                                box_max.y <= min.y or max.y <= box_min.y or
+                                box_max.z <= min.z or max.z <= box_min.z) then
+                            -- Calculate penetration depths for each axis
+                            local penetration_depth_x = math.min(max.x - box_min.x, box_max.x - min.x)
+                            local penetration_depth_y = math.min(max.y - box_min.y, box_max.y - min.y)
+                            local penetration_depth_z = math.min(max.z - box_min.z, box_max.z - min.z)
+
+                            -- Find the axis with the maximum penetration depth
+                            if penetration_depth_x > max_penetration_depth then
+                                max_penetration_depth = penetration_depth_x
+                                collision_normal = vec(1, 0, 0)
+                            end
+                            if penetration_depth_y > max_penetration_depth then
+                                max_penetration_depth = penetration_depth_y
+                                collision_normal = vec(0, 1, 0)
+                            end
+                            if penetration_depth_z > max_penetration_depth then
+                                max_penetration_depth = penetration_depth_z
+                                collision_normal = vec(0, 0, 1)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if max_penetration_depth > 0 then
+        return true, collision_normal
+    else
+        return false
+    end
 end
 
 function Swingable3D:render(delta)
