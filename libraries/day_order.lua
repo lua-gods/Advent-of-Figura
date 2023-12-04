@@ -11,7 +11,7 @@ return {
     "baubles", -- 4P5
     "snowflakes", -- 4P5
     "lights", -- 4P5 & Chloe
-    nil,
+    "cauldron", -- juice of apple
     nil,
     nil,
     nil,
