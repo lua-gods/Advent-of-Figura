@@ -43,9 +43,15 @@ function day:init(skull)
     bauble.string:scale(1, -offset.y * 16 - 8, 1)
     part:addChild(bauble)
 
-    local swingable = Swingable3D.new(part)
-    skull.data.swingable = swingable
-    skull.data.wind = vec(0,0,0)
+    delay(function ()
+        local swingable = Swingable3D.new(part)
+        swingable.pos = (part:getPos() / 16) + vec(0.5,-1,0.5)
+        swingable._pos = swingable.pos
+        swingable.rot = rng.vec3()
+        swingable._rot = swingable.rot
+        skull.data.swingable = swingable
+        skull.data.wind = vec(0,0,0)
+    end, 1)
 end
 
 function day:tick(skull)
@@ -55,7 +61,9 @@ function day:tick(skull)
 end
 
 function day:punch(skull, puncher)
-    skull.data.wind = skull.data.wind - (puncher:getPos() - skull.pos):normalize() * 0.1
+    if not skull.data.swingable then return end
+    if puncher:getHeldItem().id:find("head") then return end
+    skull.data.wind = skull.data.wind - (puncher:getPos():add(0,puncher:getEyeHeight(),0) - (skull.render_pos + vec(0.5,0.5,0.5))):normalize() * 0.1
 end
 
 function day:render(skull, delta)
