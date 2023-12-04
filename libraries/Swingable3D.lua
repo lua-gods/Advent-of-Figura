@@ -1,9 +1,10 @@
-local AIR_RESISTANCE = 0.05
+local AIR_RESISTANCE = 0.15
 local GRAVITY = -9.81
 local SIM_SPEED = 5
 
 ---@class Swingable3D
 ---@field part ModelPart
+---@field base Vector3
 ---@field pos Vector3
 ---@field _pos Vector3
 ---@field rot Vector3
@@ -19,6 +20,7 @@ Swingable3D.__index = Swingable3D
 function Swingable3D.new(part)
     local self = setmetatable({}, Swingable3D)
     self.part = part
+    self.base = part:partToWorldMatrix():apply()
     self.pos = part:partToWorldMatrix():apply()
     self._pos = self.pos:copy()
     self.rot = vec(0,0,0)
@@ -36,7 +38,6 @@ end
 function Swingable3D:tick(input_velocity)
     local dt = 0.05
 
-    local base = self.part:partToWorldMatrix():apply()
     local velocity = ((self.pos - self._pos) + (input_velocity or vec(0,0,0))) / dt
 
     local air_resistance = velocity * (-AIR_RESISTANCE)
@@ -51,19 +52,19 @@ function Swingable3D:tick(input_velocity)
     if colliding then
         local reflect_dir = reflect(velocity, normal)
         local damping = 0.5
-        self.velocity = -reflect_dir * damping
+        local vel = -reflect_dir * damping
         
         self._pos = self.pos:copy()
-        self.pos = self.pos + self.velocity * dt
+        self.pos = self.pos + vel * dt
     else
         self._pos = self.pos:copy()
         self.pos = self.pos + velocity * dt
     end
 
-    local direction = self.pos - base
-    self.pos = base + direction:normalized()
+    local direction = self.pos - self.base
+    self.pos = self.base + direction:normalized()
 
-    local relative = self.part:partToWorldMatrix():invert():apply(base + (self.pos - base)):normalize()
+    local relative = self.pos - self.base
     relative = vectors.rotateAroundAxis(90, relative, vec(-1, 0, 0))
     local yaw = math.deg(math.atan2(relative.x, relative.z))
     local pitch = math.deg(math.asin(-relative.y))
@@ -85,7 +86,8 @@ local function drawBounds(min, max, lifetime)
 end
 
 function Swingable3D:getBounds()
-    local pos = self.part:partToWorldMatrix():apply(0,(self.offset + 0.25) * 16,0)
+    local dir = self.pos - self.base
+    local pos = self.base + dir:normalized() * -self.offset + vec(0, 0.25, 0)
     local size = 0.5
     local half = size / 2
     local min = pos - vec(half, half, half)
@@ -116,12 +118,10 @@ function Swingable3D:isColliding()
                         if not (box_max.x <= min.x or max.x <= box_min.x or
                                 box_max.y <= min.y or max.y <= box_min.y or
                                 box_max.z <= min.z or max.z <= box_min.z) then
-                            -- Calculate penetration depths for each axis
                             local penetration_depth_x = math.min(max.x - box_min.x, box_max.x - min.x)
                             local penetration_depth_y = math.min(max.y - box_min.y, box_max.y - min.y)
                             local penetration_depth_z = math.min(max.z - box_min.z, box_max.z - min.z)
 
-                            -- Find the axis with the maximum penetration depth
                             if penetration_depth_x > max_penetration_depth then
                                 max_penetration_depth = penetration_depth_x
                                 collision_normal = vec(1, 0, 0)
