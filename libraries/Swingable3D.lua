@@ -50,6 +50,16 @@ local function drawBounds(min, max, lifetime)
     particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,size.y,size.z)):spawn()
 end
 
+function Swingable3D:impactSound(play_bulk)
+    if (TIME - self.last_sound > 1) then
+        sounds["block.amethyst_block.place"]:pos(self:getPos()):pitch(rng.float(2.5,4)):play()
+        self.last_sound = TIME
+    elseif play_bulk then
+        sounds["impact" .. rng.int(1,6)]:pos(self:getPos()):play()
+        self.last_sound = TIME
+    end
+end
+
 function Swingable3D:tick(other_swingables)
     local min, max = self:getBounds()
     drawBounds(min, max, 1)
@@ -73,13 +83,9 @@ function Swingable3D:tick(other_swingables)
         local reflect_dir = reflect(velocity, normal)
         local damping = 0.8
         local vel = -reflect_dir * damping
-        if TIME - self.last_sound > 2 then
-            sounds["block.amethyst_block.place"]:pos(self:getPos()):pitch(rng.float(2.5,4)):play()
-            self.last_sound = TIME
-        else
-            sounds["impact" .. rng.int(1,6)]:pos(self:getPos()):play()
-            self.last_sound = TIME
-        end
+
+        self:impactSound(true)
+
         self._pos = self.pos:copy()
         self.pos = self.pos + vel * dt
     else
@@ -155,6 +161,21 @@ function Swingable3D:isColliding(other_swingables)
                         end
                     end
                 end
+            end
+        end
+    end
+
+    for i = 1, #other_swingables do
+        local collider = other_swingables[i]
+        if collider ~= self then
+            local their_min, their_max = collider:getBounds()
+            if not (their_max.x <= min.x or max.x <= their_min.x or
+                    their_max.y <= min.y or max.y <= their_min.y or
+                    their_max.z <= min.z or max.z <= their_min.z) then
+                local collision_dir = (self:getPos() - collider:getPos()):normalized()
+                self.velocity = collision_dir * 0.005
+                self.pos = self.pos + collision_dir * 0.01
+                self:impactSound()
             end
         end
     end

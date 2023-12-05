@@ -67,6 +67,7 @@ end
 function day:punch(skull, puncher)
     if not skull.data.swingable then return end
     if puncher:getHeldItem().id:find("head") then return end
+    skull.data.swingable:impactSound()
     skull.data.swingable.velocity = skull.data.swingable.velocity - (puncher:getPos():add(0,puncher:getEyeHeight(),0) - (skull.render_pos + vec(0.5,0.5,0.5))):normalize() * 0.02
 end
 
