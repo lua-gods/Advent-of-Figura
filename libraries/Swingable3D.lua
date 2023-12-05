@@ -12,6 +12,8 @@ local SIM_SPEED = 5
 ---@field equilibrium Vector3
 ---@field spring number
 ---@field offset number
+---@field velocity Vector3
+---@field last_sound number
 local Swingable3D = {}
 Swingable3D.__index = Swingable3D
 
@@ -25,8 +27,10 @@ function Swingable3D.new(part)
     self._pos = self.pos:copy()
     self.rot = vec(0,0,0)
     self.equilibrium = vec(0,1,0)
+    self.velocity = vec(0,0,0)
     self.spring = 0
     self.offset = 0
+    self.last_sound = TIME
     return self
 end
 
@@ -34,11 +38,27 @@ local function reflect(velocity, normal)
     return velocity - 2 * velocity:dot(normal) * normal
 end
 
----@param input_velocity Vector3
-function Swingable3D:tick(input_velocity)
+local function drawBounds(min, max, lifetime)
+    local size = max - min
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,0,0)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,0,size.z)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,size.y,0)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,size.y,size.z)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,0,0)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,0,size.z)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,size.y,0)):spawn()
+    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,size.y,size.z)):spawn()
+end
+
+function Swingable3D:tick(other_swingables)
+    local min, max = self:getBounds()
+    drawBounds(min, max, 1)
+
     local dt = 0.05
 
-    local velocity = ((self.pos - self._pos) + (input_velocity or vec(0,0,0))) / dt
+    local velocity = ((self.pos - self._pos) + self.velocity) / dt
+
+    self.velocity = self.velocity * 0.8
 
     local air_resistance = velocity * (-AIR_RESISTANCE)
     velocity = velocity + air_resistance * dt
@@ -48,12 +68,18 @@ function Swingable3D:tick(input_velocity)
 
     velocity = velocity + vec(0, GRAVITY * ((dt * 1.3 * SIM_SPEED)^2), 0)
 
-    local colliding, normal = self:isColliding()
+    local colliding, normal = self:isColliding(other_swingables)
     if colliding then
         local reflect_dir = reflect(velocity, normal)
         local damping = 0.8
         local vel = -reflect_dir * damping
-        
+        if TIME - self.last_sound > 2 then
+            sounds["block.amethyst_block.place"]:pos(self:getPos()):pitch(rng.float(2.5,4)):play()
+            self.last_sound = TIME
+        else
+            sounds["impact" .. rng.int(1,6)]:pos(self:getPos()):play()
+            self.last_sound = TIME
+        end
         self._pos = self.pos:copy()
         self.pos = self.pos + vel * dt
     else
@@ -73,30 +99,22 @@ function Swingable3D:tick(input_velocity)
     self.rot = vec(pitch, 0, yaw)
 end
 
-local function drawBounds(min, max, lifetime)
-    local size = max - min
-    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,0,0)):spawn()
-    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,0,size.z)):spawn()
-    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,size.y,0)):spawn()
-    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(0,size.y,size.z)):spawn()
-    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,0,0)):spawn()
-    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,0,size.z)):spawn()
-    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,size.y,0)):spawn()
-    particles["end_rod"]:lifetime(lifetime):gravity():scale(0.2):pos(min + vec(size.x,size.y,size.z)):spawn()
+function Swingable3D:getPos()
+    local dir = self.pos - self.base
+    local pos = self.base + dir:normalized() * -self.offset + vec(0, 0.25, 0)
+    return pos
 end
 
 function Swingable3D:getBounds()
-    local dir = self.pos - self.base
-    local pos = self.base + dir:normalized() * -self.offset + vec(0, 0.25, 0)
+    local pos = self:getPos()
     local size = 0.5
     local half = size / 2
     local min = pos - vec(half, half, half)
     local max = pos + vec(half, half, half)
-    drawBounds(min, max, 1)
     return min, max
 end
 
-function Swingable3D:isColliding()
+function Swingable3D:isColliding(other_swingables)
     local min, max = self:getBounds()
     local search_min = min:copy():floor()
     local search_max = max:copy():floor()
@@ -108,7 +126,7 @@ function Swingable3D:isColliding()
             for z = search_min.z, search_max.z do
                 local block_pos = vec(x, y, z)
                 local block = world.getBlockState(block_pos)
-                if block:getPos().x_z ~= self.pos.x_z:floor() then
+                if not block.id:find("head") then
                     local boxes = block:getCollisionShape()
                     for i = 1, #boxes do
                         local box = boxes[i]

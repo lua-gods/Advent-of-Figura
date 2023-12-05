@@ -15,6 +15,10 @@ end
 
 local baubles = models.baubles.Bauble:getChildren()
 
+function day:globalInit()
+    day.baubles = {}
+end
+
 function day:globalTick()
     item_part:rot(0, TIME * 0.5, 0):color(vectors.hsvToRGB((client:getSystemTime() / 5000) % 1,0.8,1))
 end
@@ -51,20 +55,19 @@ function day:init(skull)
         swingable._rot = swingable.rot
         swingable.offset = offset.y
         skull.data.swingable = swingable
-        skull.data.wind = vec(0,0,0)
+        day.baubles[#day.baubles + 1] = swingable
     end, 1)
 end
 
 function day:tick(skull)
     if not skull.data.swingable then return end
-    skull.data.swingable:tick(skull.data.wind)
-    skull.data.wind = skull.data.wind * 0.8
+    skull.data.swingable:tick(day.baubles)
 end
 
 function day:punch(skull, puncher)
     if not skull.data.swingable then return end
     if puncher:getHeldItem().id:find("head") then return end
-    skull.data.wind = skull.data.wind - (puncher:getPos():add(0,puncher:getEyeHeight(),0) - (skull.render_pos + vec(0.5,0.5,0.5))):normalize() * 0.02
+    skull.data.swingable.velocity = skull.data.swingable.velocity - (puncher:getPos():add(0,puncher:getEyeHeight(),0) - (skull.render_pos + vec(0.5,0.5,0.5))):normalize() * 0.02
 end
 
 function day:render(skull, delta)
@@ -73,5 +76,10 @@ function day:render(skull, delta)
 end
 
 function day:exit(skull)
-
+    for i = 1, #day.baubles do
+        if day.baubles[i] == skull.data.swingable then
+            table.remove(day.baubles, i)
+            break
+        end
+    end
 end
