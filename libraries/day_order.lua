@@ -12,7 +12,7 @@ return {
     "snowflakes", -- 4P5
     "lights", -- 4P5 & Chloe
     "cauldron", -- juice of apple
-    nil,
+    "shelfElf", -- Chloe
     nil,
     nil,
     nil,
