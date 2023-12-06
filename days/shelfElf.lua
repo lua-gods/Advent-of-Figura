@@ -8,7 +8,7 @@ function day:init(skull)
   skull.data.model = skull:addPart(models.shelfElf)
 end
 
-local maxCeilingHeight = 10 
+local maxCeilingHeight = 5 
 local function checkCeilng(clientPos)
   local likleyCeiling = 0
   for k = 1, maxCeilingHeight do
@@ -24,18 +24,22 @@ local function isOnScreen(worldPos)
   return (-2 < screenPos.x and screenPos.x < 2) and (-2 < screenPos.y and screenPos.y < 2) and screenPos.z > 1
 end
 
-local denyList = {"head"}
+local denyList = {"head","door"}
 ---@param skull Skull
 function day:tick(skull)
   if not skull.isntFirstTick then skull.isntFirstTick = true return end
   local clientPos = client.getViewer():getPos()
   local headPos = skull.data.model.ROOT:partToWorldMatrix():apply()
   if not isOnScreen(skull.data.model.ROOT:partToWorldMatrix():apply()) then
-    skull.data.model.ROOT:setRot(vec(0,math.deg(math.atan2(clientPos.x - headPos.x,clientPos.z - headPos.z)) - 180,0) - skull.data.model:getRot())
-    if TIME % 100 == 0 then
+    local horosontalDistance = math.sqrt((clientPos.x-headPos.x)^2 + (clientPos.z-headPos.z)^2)
+    local xRot = math.deg(math.atan2(clientPos.y + 1 - headPos.y,horosontalDistance))
+    local yRot = math.deg(math.atan2(clientPos.x - headPos.x,clientPos.z - headPos.z)) - 180
+    skull.data.model.ROOT:setRot(vec(0,yRot,0) - skull.data.model:getRot())
+    skull.data.model.ROOT.Elf.Head:setRot(xRot,0,0)
+    if TIME % 99 == 0 then
       local likleyCeiling = checkCeilng(clientPos)
       local randomPos = vec(skull.pos.x + math.random(-4,4), math.floor(clientPos.y) + likleyCeiling, skull.pos.z + math.random(-4,4))
-      for k = 1, 20 do
+      for k = 0, 5 + likleyCeiling do
         local pos = randomPos - vec(0,k,0)
         local blockstate = world.getBlockState(pos)
         local aboveBlockstate = world.getBlockState(pos+vec(0,1,0))
@@ -63,7 +67,8 @@ function day:tick(skull)
       end
     end
   else
-    if ((clientPos.x-headPos.x)^2 + (clientPos.z-headPos.z)^2) < 4 and (not skull.hasJumpscared) then
+    local horosontalDistance = math.sqrt((clientPos.x-headPos.x)^2 + (clientPos.z-headPos.z)^2)
+    if (horosontalDistance^2 + (clientPos.y-headPos.y)^2) < 9 and (not skull.hasJumpscared) then
       sounds:playSound("minecraft:ambient.cave",clientPos)
     end
     skull.hasJumpscared = true
