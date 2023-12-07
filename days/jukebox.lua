@@ -8,68 +8,46 @@ local day = Calendar:newDay("jukebox")
 
 day:setItemPart(models.jukebox)
 
-local notes = {
-    [0] = { 1.26, 1.498, 1, 0.5 },
-    [15] = { 1.335, 1.682 },
-    [20] = { 1.26, 1.498, 1 },
-    [30] = { 1, 1.26, 0.749, 0.5 },
-    [45] = { 0.841 },
-    [50] = { 0.749 },
-    [60] = { 1.26, 1.498, 1, 0.5 },
-    [75] = { 1.335, 1.682 },
-    [80] = { 1.26, 1.498, 1 },
-    [90] = { 1, 1.26, 0.749, 0.5 },
-    [105] = { 0.841 },
-    [110] = { 0.749 },
-    [120] = { 1.335, 2.245, 0.944, 0.749 },
-    [140] = { 1.335, 2.245, 0.944 },
-    [150] = { 1.335, 1.888, 1.122, 0.749 },
-    [165] = { 1.26 },
-    [170] = { 1.122 },
-    [180] = { 1.26, 2, 1, 0.749 },
-    [200] = { 1.26, 2, 1 },
-    [210] = { 1.498, 1.26, 0.749, 0.5 },
-    [225] = { 1.122 },
-    [230] = { 1 },
-    [240] = { 1.335, 1.682, 0.667, 1 },
-    [260] = { 1.335, 1.682, 0.667, 0.841 },
-    [270] = { 1.682, 2, 0.667, 1 },
-    [285] = { 1.498, 1.888 },
-    [290] = { 1.335, 1.682 },
-    [300] = { 1.26, 1.498, 1, 0.63 },
-    [315] = { 1.335, 1.682 },
-    [320] = { 1.26, 1.498, 1 },
-    [330] = { 1, 1.26, 0.749, 0.5 },
-    [345] = { 0.841 },
-    [350] = { 0.749 },
-    [360] = { 1.335, 1.682, 0.667, 1 },
-    [380] = { 1.335, 1.682, 0.667, 0.841 },
-    [390] = { 1.682, 2, 0.667, 1 },
-    [405] = { 1.498, 1.888 },
-    [410] = { 1.335, 1.682 },
-    [420] = { 1.26, 1.498, 1, 0.63 },
-    [435] = { 1.335, 1.682 },
-    [440] = { 1.26, 1.498, 1 },
-    [450] = { 1, 1.26, 0.749, 0.5 },
-    [465] = { 0.841 },
-    [470] = { 0.749 },
-    [480] = { 1.335, 2.245, 0.749, 0.944 },
-    [500] = { 1.335, 2.245, 0.749, 0.944 },
-    [510] = { 1.682, 2.67, 1.122, 0.561 },
-    [525] = { 1.335, 2.245 },
-    [530] = { 1.498, 1.888, 0.749 },
-    [540] = { 1.26, 2, 1, 0.63 },
-    [555] = { 0.667 },
-    [560] = { 0.63 },
-    [570] = { 1.498, 2.52, 1, 0.5 },
-    [600] = { 1.26, 2, 0.63, 0.749 },
-    [615] = { 1.26, 1.498 },
-    [620] = { 1, 1.26, 0.5, 0.749 },
-    [630] = { 0.944, 1.498, 0.375, 0.667 },
-    [645] = { 0.841, 1.335 },
-    [650] = { 0.944, 1.122, 0.375, 0.561 },
-    [660] = { 0.749, 1, 0.5, 0.63 },
-}
+local function toMcPitch(pitch)
+    return 2 ^ ((pitch - 60) / 12)
+end
+
+local function parseString(string_representation)
+    local notes = {}
+    local total_time = 0
+    local pattern = "(%d+),(%d+)" .. ";"
+
+    for time_diff, note in string_representation:gmatch(pattern) do
+        total_time = total_time + tonumber(time_diff)
+        note = tonumber(note)
+
+        if not notes[total_time] then
+            notes[total_time] = {}
+        end
+        table.insert(notes[total_time], toMcPitch(note))
+    end
+
+    return notes
+end
+
+local n_songs = 0
+local songs = {}
+for i, path in next, listFiles("days.songs") do
+    local song = {
+        title = path:gsub("days%.songs%.",""),
+        notes = parseString(require(path))
+    }
+    songs[i] = song
+end
+
+local selected_song = 1
+local song = songs[1]
+local last_note = 0
+for time in pairs(song.notes) do
+    if time > last_note then
+        last_note = time
+    end
+end
 
 ---@type table<string,fun(block : BlockState): boolean?>
 local instrument = {
@@ -160,11 +138,11 @@ end
 
 local UP = vec(0,1,0)
 local function note(time, pos, id)
-    if notes[time] then
-        for i = 1, #notes[time] do
-            sounds[id]:pos(pos + UP):attenuation(1.5):volume(0.7):pitch(notes[time][i]):play()
+    if song.notes[time] then
+        for i = 1, #song.notes[time] do
+            sounds[id]:pos(pos + UP):attenuation(1.5):volume(0.7):pitch(song.notes[time][i]):play()
         end
-        return notes[time]
+        return song.notes[time]
     end
 end
 
@@ -197,7 +175,7 @@ function day:globalInit()
 end
 
 function day:globalTick()
-    self.time = (self.time + 1) % 720
+    self.time = (self.time + 1) % last_note
 end
 
 ---@param skull Skull
@@ -231,12 +209,12 @@ end
 
 function day:punch(skull, puncher)
     if puncher:getHeldItem().id:find("head") then return end
-    bounce(skull)
-    for i = 1, 32 do
-        if day:tick(skull) then
-            break
-        end
+    selected_song = selected_song + 1
+    if selected_song > #songs then
+        selected_song = 1
     end
+    song = songs[selected_song]
+    self.time = 0
 end
 
 ---@param skull Skull
