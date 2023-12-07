@@ -6,14 +6,14 @@ return {
     "jukebox", -- 4P5
     "door_wreath", -- Chloe
     "christmas_hat", -- Auria
-    "tree", -- GN & Slyme
     "snow_globe", -- 4P5
-    "baubles", -- 4P5
-    "snowflakes", -- 4P5
-    "lights", -- 4P5 & Chloe
     "cauldron", -- juice of apple
+    "vines", -- 4P5
+    "snowflakes", -- 4P5
     "shelfElf", -- Chloe
-    nil,
+    "tree", -- GN & Slyme
+    "lights", -- 4P5 & Chloe
+    "baubles", -- 4P5
     nil,
     nil,
     nil,
