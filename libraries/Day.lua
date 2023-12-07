@@ -37,6 +37,10 @@ function Day:globalInit(skulls) end
 function Day:globalTick(skulls) end
 
 ---@param skulls Skull[]
+---@param delta number
+function Day:globalRender(skulls, delta) end
+
+---@param skulls Skull[]
 function Day:globalExit(skulls) end
 
 ------ HELMET ITEM

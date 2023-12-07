@@ -58,9 +58,9 @@ end
 
 local initialized = {}
 local initialized_players = {}
+local active = {}
 function events.WORLD_TICK()
-    local active = {}
-
+    active = {}
     for _, skull in next, manager:getAll() do
         local day = skull.day
         active[day] = active[day] or {}
@@ -102,5 +102,11 @@ function events.WORLD_TICK()
             wearing[uuid] = nil
             initialized_players[uuid] = nil
         end
+    end
+end
+
+function events.WORLD_RENDER(delta)
+    for day, skulls in next, active do
+        day:globalRender(skulls, delta)
     end
 end
