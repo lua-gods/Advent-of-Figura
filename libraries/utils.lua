@@ -10,6 +10,8 @@ local abs = math.abs
 
 local dot = vec(0,0,0).dot
 
+local concat = table.concat
+
 local utils = {}
 
 ---@param dir Vector3
@@ -19,11 +21,13 @@ function utils.dirToAngle(dir)
 end
 
 ---@param model ModelPart
+---@param apply? fun(part: ModelPart)
 ---@return ModelPart
-function utils.deepCopy(model)
+function utils.deepCopy(model, apply)
     local copy = model:copy(model:getName())
     for _, child in pairs(copy:getChildren()) do
         copy:removeChild(child):addChild(utils.deepCopy(child)):parentType()
+        if apply then apply(child) end
     end
     return copy
 end
@@ -90,6 +94,44 @@ function utils.cooldown(key, next_time)
         return true
     end
     return false
+end
+
+---@param str string
+---@param on? string default: " "
+---@return string[]
+function utils.split(str, on)
+    on = on or " "
+    local result = {}
+    local delimiter = on:gsub("([%(%)%.%%%+%-%*%?%[%]%^%$])", "%%%1")
+    for match in (str .. on):gmatch("(.-)" .. delimiter) do
+        result[#result+1] = match
+    end
+    return result
+end
+
+---@param ... any|any[]
+---@return table<any, boolean>
+function utils.set(...)
+    local result = {}
+    local args = type(...) == "table" and ... or {...}
+    for i = 1, #args do
+        result[args[i]] = true
+    end
+    return result
+end
+
+---@generic F: fun(...): any
+---@param func F
+---@return F memoized
+function utils.memoize(func)
+    local cache = {}
+    return function(...)
+        local key = concat({...}, ",")
+        if not cache[key] then
+            cache[key] = func(...)
+        end
+        return cache[key]
+    end
 end
 
 _G.utils = utils
