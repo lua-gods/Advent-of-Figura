@@ -117,6 +117,7 @@ local function find_instrument(block)
             for key, value in pairs(instrument) do
                 if value(block) then
                     cache[block:toStateString()] = key
+                    break
                 end
             end
         end
