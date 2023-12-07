@@ -35,7 +35,7 @@ function events.SKULL_RENDER(delta, blockstate, itemstack, entity, context)
             manager:add(Skull.new(blockstate, SkullRenderer.new(), chooseDay(blockstate)))
         end
     elseif entity and context == "HEAD" then
-        local day = mode_getter.fromItem(itemstack)
+        local day = mode_getter.fromItem(itemstack) or calendar:today()
         if day then
             day:wornRender(entity, delta)
             for _, part in pairs(day.worn_parts) do
@@ -45,7 +45,7 @@ function events.SKULL_RENDER(delta, blockstate, itemstack, entity, context)
             wearing[entity:getUUID()] = day
         end
     elseif item then
-        local day = mode_getter.fromItem(itemstack)
+        local day = mode_getter.fromItem(itemstack) or calendar:today()
         if day and day.item_part then
             day.item_part:visible(true)
             rendered[#rendered + 1] = day.item_part
