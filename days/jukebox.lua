@@ -128,19 +128,22 @@ local instrument = {
     ["block.anvil.land"] = function (block) return block.id:find("anvil") and true or false end
 }
 
+local cache = {}
 local function find_instrument(block)
-    if block.id then
+    if not cache[block:toStateString()] then
+        cache[block:toStateString()] = "block.note_block.harp"
         local data = block:getEntityData()
         if data and type(data.note_block_sound) == 'string' then
-            return data.note_block_sound
-        end
-        for key, value in pairs(instrument) do
-            if value(block) then
-                return key
+            cache[block:toStateString()] = data.note_block_sound
+        else
+            for key, value in pairs(instrument) do
+                if value(block) then
+                    cache[block:toStateString()] = key
+                end
             end
         end
     end
-    return "block.note_block.harp"
+    return cache[block:toStateString()]
 end
 
 ---@param skull Skull
@@ -199,6 +202,7 @@ end
 
 ---@param skull Skull
 function day:tick(skull)
+    skull.data.instrument = find_instrument(world.getBlockState(skull.pos:copy():sub(0,1,0)))
     local pitches = note(self.time, skull.pos + OFFSET, skull.data.instrument)
     if pitches then
         for i = 1, #pitches do
