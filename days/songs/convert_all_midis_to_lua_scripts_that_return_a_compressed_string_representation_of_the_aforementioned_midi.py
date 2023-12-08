@@ -1,29 +1,27 @@
-import mido
+import pretty_midi
 import os
 import sys
 
 def convert_midi_to_string(midi_file_path, separator=';'):
-    midi_file = mido.MidiFile(midi_file_path)
+    midi_data = pretty_midi.PrettyMIDI(midi_file_path)
+    notes = []
+
+    # Extract notes from all instruments and add them to a single list with timing information
+    for instrument in midi_data.instruments:
+        for note in instrument.notes:
+            start_time = round(note.start * 20)  # Convert start time to 20th of a second
+            notes.append((start_time, note.pitch))
+
+    # Sort the notes by their start time
+    notes.sort(key=lambda x: x[0])
+
+    # Now convert the sorted notes to string
     string_representation = ""
     last_time = 0
-    current_tempo = 500000  # Default MIDI tempo (120 BPM)
-
-    for track in midi_file.tracks:
-        current_time = 0
-        for msg in track:
-            current_time += msg.time
-
-            if msg.type == 'set_tempo':
-                current_tempo = msg.tempo  # Update the current tempo
-            elif msg.type == 'note_on' and msg.velocity > 0:
-                # Convert ticks to seconds
-                seconds = mido.tick2second(current_time, midi_file.ticks_per_beat, current_tempo)
-                time_in_20th_seconds = round(seconds * 20)
-                time_difference = time_in_20th_seconds - last_time
-                last_time = time_in_20th_seconds
-
-                # Append the time difference and MIDI note number to the string
-                string_representation += f"{time_difference},{msg.note}{separator}"
+    for start_time, pitch in notes:
+        time_diff = start_time - last_time
+        last_time = start_time
+        string_representation += f"{time_diff},{pitch}{separator}"
 
     return string_representation
 
@@ -41,5 +39,3 @@ def process_directory(directory_path):
 if __name__ == "__main__":
     directory_path = sys.argv[1] if len(sys.argv) > 1 else '.'
     process_directory(directory_path)
-
-# thank you chatgpt :3
