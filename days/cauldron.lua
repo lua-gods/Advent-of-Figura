@@ -264,9 +264,7 @@ function day:init(skull)
             heatStress = heatStress + heatThrust / 50
 
             if math.random() < (heatStress - 50) / 100 then
-                pcall(function()
-                    particles:newParticle("dust 0.5 0.5 0.5 1"):velocity(0, 0.03, 0):pos(skull.pos + vec(math.random() * 0.5 + 0.25, 0.5, math.random() * 0.5 + 0.25))
-                end)
+                particles["dust 0.5 0.5 0.5 1"]:velocity(0, 0.03, 0):pos(skull.pos + vec(math.random() * 0.5 + 0.25, 0.5, math.random() * 0.5 + 0.25)):spawn()
             end
 
             if finishing < 1 then
@@ -279,11 +277,12 @@ function day:init(skull)
                         if math.random() > 0.5 then
                             color = vec(0, 1, 0)
                         end
-                        particles:newParticle("firework")
+                        particles["firework"]
                         :velocity((math.random() - 0.5) / 2, math.random(), (math.random() - 0.5) / 2)
                         :pos(skull.pos + vec(0.5, 0.8, 0.5))
                         :color(color)
                         :lifetime(1000)
+                        :spawn()
                     end
                 end
             end
