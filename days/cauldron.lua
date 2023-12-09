@@ -264,7 +264,9 @@ function day:init(skull)
             heatStress = heatStress + heatThrust / 50
 
             if math.random() < (heatStress - 50) / 100 then
-                particles:newParticle("dust 0.5 0.5 0.5 1"):velocity(0, 0.03, 0):pos(skull.pos + vec(math.random() * 0.5 + 0.25, 0.5, math.random() * 0.5 + 0.25))
+                pcall(function()
+                    particles:newParticle("dust 0.5 0.5 0.5 1"):velocity(0, 0.03, 0):pos(skull.pos + vec(math.random() * 0.5 + 0.25, 0.5, math.random() * 0.5 + 0.25))
+                end)
             end
 
             if finishing < 1 then
