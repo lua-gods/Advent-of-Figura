@@ -5,16 +5,26 @@ local Bubble = require("libraries.Bubble")
 ---@param skull Skull
 function day:init(skull)
     skull.data.overdrive = 0
+    skull.data.part = skull:addPart(models.bubbles.Machine)
 end
 
 ---@param skull Skull
 function day:tick(skull)
-    if math.random() > 0.7 then
-        Bubble.new(skull.render_pos + vec(0.5,0.5,0.5), vec(0,0.1,0) + vec(math.sin(TIME/10),0,math.cos(TIME/10)) * 0.12)
+    local pos = skull.data.part.Gun:partToWorldMatrix():apply(2,2,9.5)
+    if math.random() > 0.6 then
+        Bubble.new(pos, vec(0,0.1,0) + vec(math.sin(TIME/10),0,math.cos(TIME/10)) * 0.12)
+        for _ = 1, 3 do
+            particles["bubble_pop"]:pos(pos):scale(1.2):spawn()
+            particles["splash"]:pos(pos + rng.vec3() * 0.1):scale(0.5):spawn()
+        end
     end
     if skull.data.overdrive > 0 then
         for i = 1, 5 do
-            Bubble.new(skull.render_pos + vec(0.5,0.5,0.5), vec(0,0.1,0) + rng.vec3():normalize() * 0.2)
+            Bubble.new(pos, vec(0,0.1,0) + rng.vec3():normalize() * 0.15 + vec(math.sin(TIME/10),0,math.cos(TIME/10)) * 0.1)
+            for _ = 1, 2 do
+                particles["bubble_pop"]:pos(pos):scale(1.2):spawn()
+                particles["splash"]:pos(pos + rng.vec3() * 0.1):scale(0.5):spawn()
+            end
         end
         skull.data.overdrive = skull.data.overdrive - 1
     end
@@ -23,13 +33,13 @@ end
 ---@param skull Skull
 ---@param puncher Player
 function day:punch(skull,puncher)
-    skull.data.overdrive = 20
+    skull.data.overdrive = 6
 end
 
 ---@param skull Skull
 ---@param delta number
 function day:render(skull, delta)
-
+    skull.data.part.Gun:rot(utils.dirToAngle(vec(math.sin((TIME + delta)/10),0.6,math.cos((TIME + delta)/10))) + vec(0,-180,0))
 end
 
 ---@param skull Skull
