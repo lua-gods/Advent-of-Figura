@@ -58,7 +58,7 @@ if failed_to_add and IS_HOST then
 end
 
 local song = songs[0]
-if Calendar:now() < 16 then
+if Calendar:now() < 16 and false then
     songs = { [0] = song }
 end
 
@@ -89,6 +89,7 @@ local instrument = {
     end,
     ["block.note_block.bell"] = function (block) return block.id == "minecraft:gold_block" end,
     ["violin"] = function (block) return block.id == "minecraft:note_block" end,
+    ["piano"] = function (block) return block.id == "minecraft:loom" end,
     ["block.note_block.flute"] = function (block) return block.id == "minecraft:clay" end,
     ["block.note_block.chime"] = function (block) return block.id == "minecraft:packed_ice" end,
     ["block.note_block.xylophone"] = function (block) return block.id == "minecraft:bone_block" end,
@@ -138,6 +139,64 @@ local function find_instrument(block)
     return cache[block:toStateString()]
 end
 
+local e_parts = {
+    include = {vectors.vec3(-1,-1,0),
+        vectors.vec3(1,-1,0),
+
+        vectors.vec3(-1,-2,0),
+
+        vectors.vec3(-1,-3,0),
+        vectors.vec3(0,-3,0),
+        vectors.vec3(1,-3,0),
+
+        vectors.vec3(-1,-4,0),
+
+        vectors.vec3(-1,-5,0),
+        vectors.vec3(0,-5,0),
+        vectors.vec3(1,-5,0),},
+    exclude = {
+        vectors.vec3(0,-2,0),
+        vectors.vec3(1,-2,0),
+
+        vectors.vec3(0,-4,0),
+        vectors.vec3(1,-4,0),
+
+        vectors.vec3(-2,-1,0),
+        vectors.vec3(-2,-2,0),
+        vectors.vec3(-2,-3,0),
+        vectors.vec3(-2,-4,0),
+        vectors.vec3(-2,-5,0),
+    }
+}
+
+local function e(pos)
+    local mat = matrices.mat4()
+    for i = 1, 4, 1 do
+        local worthy = true
+        local block = world.getBlockState(pos:copy():add(0,-1,0)).id
+        for key, offset in pairs(e_parts.include) do
+            local gpos = pos + mat:apply(offset)
+            if world.getBlockState(gpos).id ~= block then
+                worthy = false
+                break
+            end
+        end
+        for key, offset in pairs(e_parts.exclude) do
+            local gpos = pos + mat:apply(offset)
+            if world.getBlockState(gpos).id == block then
+                worthy = false
+                break
+            end
+        end
+        if worthy then
+            print("worthy")
+            return true
+        else
+            mat:rotateY(90)
+        end
+    end
+end
+
 ---@param skull Skull
 function day:init(skull)
     if not self.main then
@@ -148,6 +207,7 @@ function day:init(skull)
     skull.data.instrument = find_instrument(world.getBlockState(skull.pos:copy():sub(0,1,0)))
     skull.data.anim_time = 0
     skull.data.particles = {}
+    skull.data.e = e(skull.pos)
 end
 
 local UP = vec(0,1,0)
