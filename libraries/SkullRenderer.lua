@@ -63,6 +63,7 @@ SkullRenderer.__index = SkullRenderer
 function SkullRenderer.new()
     local self = setmetatable({}, SkullRenderer)
     self.parts = {}
+    self.tasks = {}
     return self
 end
 
