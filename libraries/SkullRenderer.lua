@@ -56,6 +56,7 @@ end
 
 ---@class SkullRenderer
 ---@field parts ModelPart[]
+---@field tasks RenderTask[]
 local SkullRenderer = {}
 SkullRenderer.__index = SkullRenderer
 
@@ -69,6 +70,13 @@ end
 function SkullRenderer:addPart(part)
     world_part:addChild(part)
     self.parts[#self.parts + 1] = part
+    return part
+end
+
+function SkullRenderer:addTask(task)
+    world_part:addTask(task)
+    self.tasks[#self.tasks + 1] = task
+    return task
 end
 
 function SkullRenderer:reset()
@@ -76,6 +84,9 @@ function SkullRenderer:reset()
         world_part:removeChild(part)
     end
     self.parts = {}
+    for _, task in next, self.tasks do
+        task:remove()
+    end
 end
 
 return SkullRenderer
