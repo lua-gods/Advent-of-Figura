@@ -183,6 +183,7 @@ end
 
 function day:globalInit()
     self.time = -2
+    song = songs[0]
 end
 
 local was_conflicted = {}
