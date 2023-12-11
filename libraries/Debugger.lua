@@ -16,7 +16,7 @@ end
 function Debugger:getAll()
     local out = {}
     for name, value in next, self.data do
-        out[#out + 1] = ("§7%s: §r§%s"):format(name, value)
+        out[#out + 1] = ("§7%s: §r%s"):format(name, value)
     end
     return out
 end
