@@ -23,13 +23,14 @@ local facing_offsets = {
 ---@field is_wall_head boolean
 ---@field day Day
 ---@field data table
+---@field debugger Debugger
 ---@field private initialized boolean
 local Skull = {}
 Skull.__index = Skull
 
 ---@param blockstate BlockState
 ---@param renderer SkullRenderer
-function Skull.new(blockstate, renderer, day)
+function Skull.new(blockstate, renderer, debugger, day)
     local self = setmetatable({}, Skull)
     self.id = blockstate:getPos():toString()
     self.is_wall_head = not not blockstate.properties.facing
@@ -38,6 +39,7 @@ function Skull.new(blockstate, renderer, day)
     self.pos = blockstate:getPos()
     self.rot = (blockstate.properties.rotation or facing_rots[blockstate.properties.facing]) * 22.5
     self.renderer = renderer
+    self.debugger = debugger
     self.day = day
     self.data = {}
     return self
