@@ -58,6 +58,9 @@ if failed_to_add and IS_HOST then
 end
 
 local song = songs[0]
+if Calendar:now() < 16 then
+    songs = { [0] = song }
+end
 
 ---@type table<string,fun(block : BlockState): boolean?>
 local instrument = {

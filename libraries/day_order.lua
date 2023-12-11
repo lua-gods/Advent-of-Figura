@@ -9,13 +9,13 @@ return {
     "snow_globe", -- 4P5
     "cauldron", -- juice of apple
     "vines", -- 4P5
+    nil, -- Sky
     "snowflakes", -- 4P5
     "shelfElf", -- Chloe
     "tree", -- GN & Slyme
+    "jukebox", -- 4P5 (updated)
     "lights", -- 4P5 & Chloe
     "baubles", -- 4P5
-    nil,
-    nil,
     nil,
     nil,
     nil,
