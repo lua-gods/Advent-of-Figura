@@ -13,8 +13,8 @@ return {"snowman", -- 4P5
         "tree", -- GN & Slyme
         "lights", -- 4P5 & Chloe
         "baubles", -- 4P5
-        nil,
-        nil,
+        "dvd", -- Deni
+        "bubbles", -- 4P5
         nil,
         nil,
         nil,
