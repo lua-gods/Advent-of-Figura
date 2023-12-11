@@ -208,6 +208,7 @@ function day:init(skull)
     skull.data.anim_time = 0
     skull.data.particles = {}
     skull.data.e = e(skull.pos)
+    skull.data.stress = 0
 end
 
 local UP = vec(0,1,0)
@@ -232,11 +233,12 @@ local OFFSET = vec(0.5, 0.5, 0.5)
 
 local function bounce(skull)
     if skull.renderer.parts[1] then
-        tween.tweenFunction(skull.data.anim_time,0.25,0.2,"outBack",function(x)
+        tween.tweenFunction(skull.data.anim_time,0.25,0.15,"outBack",function(x)
             skull.data.anim_time = x --[[@as number]]
             skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
+            
         end,function()
-            tween.tweenFunction(.25,0,0.4,"outQuad",function(x)
+            tween.tweenFunction(.25,0,0.5,"outSine",function(x)
                 skull.data.anim_time = x --[[@as number]]
                 skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
             end,nil,"JukeboxSing"..skull.id)
@@ -300,11 +302,13 @@ function day:tick(skull)
             return
         end
     end
-
+    if skull.data.stress > 0 then
+        skull.data.stress = skull.data.stress - 0.005
+    end
     if self.time < 0 then
         return
     end
-
+    skull.renderer.parts[1]:setPos((skull.pos * 16):add((math.random() - 0.5) * skull.data.stress,0,(math.random() - 0.5) * skull.data.stress))
     skull.data.instrument = find_instrument(world.getBlockState(skull.pos:copy():sub(0,1,0)))
     local pitches = note(self.time, skull.pos + OFFSET, skull.data.instrument)
     if pitches then
@@ -315,6 +319,7 @@ function day:tick(skull)
                 lifetime = lifetime,
                 max_lifetime = lifetime
             }
+            skull.data.stress = skull.data.stress + 0.01
         end
         bounce(skull)
     end
