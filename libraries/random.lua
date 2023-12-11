@@ -31,9 +31,10 @@ function rng.step(from, to, step)
 end
 
 ---@param ... table|...
----@return any
+---@return any val, integer index
 function rng.of(...)
-    return type((...)) == "table" and (...)[rng.int(#(...))] or rng.of({...})
+    local i = rng.int(#(...))
+    return type((...)) ~= "table" and rng.of({...}) or (...)[i], i
 end
 
 _G.rng = rng
