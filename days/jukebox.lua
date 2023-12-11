@@ -266,6 +266,10 @@ function day:tick(skull)
         end
     end
 
+    skull.debugger:expose("instrument", skull.data.instrument)
+    skull.debugger:expose("time", self.time)
+    skull.debugger:expose("song", song.title)
+
     return pitches and true or false
 end
 

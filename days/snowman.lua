@@ -46,20 +46,30 @@ local function roll(skull)
 
     math.randomseed(skull.pos.x * 73856093 + skull.pos.y * 19349663 + skull.pos.z * 83492791)
     math.random(); math.random(); math.random()
-    local top = skull:addPart(top_variant[math.random(1, #top_variant)])
-    if type ~= "top" then
-        top:rot(0, rng.float(0, 360), 0)
+
+    local debug_seed = ""
+    do
+        local variant, index = rng.of(top_variant)
+        debug_seed = debug_seed .. index
+        local top = skull:addPart(variant)
+        if type ~= "top" then
+            top:rot(0, rng.float(0, 360), 0)
+        end
+        processVariant(top)
+        skull.data.top = top
     end
-    processVariant(top)
-    skull.data.top = top
 
     local below = world.getBlockState(skull.pos + vec(0,-1,0))
     if below:isAir() or below.id:find("head") then
-        local bottom = skull:addPart(bottom_variant[math.random(1, #bottom_variant)]):rot(0, rng.float(0, 360), 0)
+        local variant, index = rng.of(bottom_variant)
+        debug_seed = debug_seed .. index
+        local bottom = skull:addPart(variant):rot(0, rng.float(0, 360), 0)
         processVariant(bottom)
         bottom:setPos(bottom:getPos() - vec(0, 8, 0))
         skull.data.bottom = bottom
     end
+
+    skull.debugger:expose("seed", debug_seed)
 end
 
 local function hint(skull)

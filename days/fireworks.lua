@@ -72,6 +72,7 @@ function day:tick(skull)
         launch(skull)
     end
     skull.data.fireworks:tick()
+    skull.debugger:expose("fireworks", skull.data.fireworks:getCount())
 end
 
 function day:punch(skull, puncher)

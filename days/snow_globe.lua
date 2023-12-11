@@ -4,10 +4,12 @@ local tween = require("libraries.GNTweenLib")
 
 day:setItemPart(models.snow_globe.SnowGlobe)
 
+local MAX_LEVEL = 300
+
 function day:init(skull)
     skull.data.snow_part = skull:addPart(models.snow_globe.SnowGlobe)
     skull.data.particles = {}
-    skull.data.snow_level = 300
+    skull.data.snow_level = MAX_LEVEL
     skull.data.shake = 0
 end
 
@@ -37,6 +39,9 @@ function day:tick(skull)
             skull.data.snow_level = skull.data.snow_level + 1
         end
     end
+
+    skull.debugger:expose("level", math.round((skull.data.snow_level / MAX_LEVEL) * 100) .. "%")
+    skull.debugger:expose("particles", #skull.data.particles)
 end
 
 function day:exit(skull)

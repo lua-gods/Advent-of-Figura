@@ -5,7 +5,7 @@ local SplineManager = require("libraries.SplineManager")
 ---@field manager SplineManager
 local day = Calendar:newDay("vines")
 
-local item_part = day:setItemPart(models.baubles.Vine.berries)
+day:setItemPart(models.baubles.Vine.berries)
 
 local manager = SplineManager.new(models.baubles.Vine:getChildren())
 
@@ -16,14 +16,12 @@ end
 function day:init(skull)
     manager.needs_pairing = true
     manager:addSkull(skull)
-    
+
     math.randomseed(skull.pos.x * 73856093 + skull.pos.y * 19349663 + skull.pos.z * 83492791)
     math.random(); math.random(); math.random()
 end
 
-function manager.postSkullRender(skull)
-
-end
+function manager.postSkullRender(skull) end
 
 function day:exit(skull)
     manager:exit(skull)

@@ -36,4 +36,8 @@ function FireworkManager:remove()
     self.fireworks = {}
 end
 
+function FireworkManager:getCount()
+    return #self.fireworks
+end
+
 return FireworkManager

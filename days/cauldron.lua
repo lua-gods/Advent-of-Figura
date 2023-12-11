@@ -108,6 +108,7 @@ end
 ---@param skull Skull
 function day:init(skull)
     local posHash = skull.pos.x * 73856093 + skull.pos.y * 19349669 + skull.pos.z * 83492791
+    skull.debugger:expose("seed", posHash)
     math.randomseed(posHash)
 
     local maxHeat = -9999
@@ -131,6 +132,9 @@ function day:init(skull)
     if math.random() > 0.9 then
         idealMixCenter = idealMixCenter * 2
     end
+
+    skull.debugger:expose("ideal_heat", idealHeatCenter)
+    skull.debugger:expose("ideal_mix", idealMixCenter)
 
     local finishing = 0
 
