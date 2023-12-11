@@ -182,7 +182,7 @@ local function bounce(skull)
 end
 
 function day:globalInit()
-    self.time = 0
+    self.time = -2
 end
 
 local was_conflicted = {}
@@ -198,7 +198,15 @@ function day:globalTick()
             local other = last or next(self.setters, skull)
             local my_pos = vectors.worldToScreenSpace(skull.render_pos)
             local other_pos = vectors.worldToScreenSpace(other.render_pos)
-            local text = my_pos.x < other_pos.x and "§7Conflict§c >" or "§c< §7Conflict"
+
+            local side = my_pos.x < other_pos.x and true or false
+            local dir_char = nil
+            dir_char = my_pos.x < other_pos.x and ">" or "<"
+            if math.abs(my_pos.y - other_pos.y) > math.abs(my_pos.x - other_pos.x) then
+                dir_char = my_pos.y < other_pos.y and "v" or "^"
+            end
+            local text = side and "§7Conflict§c " .. dir_char or "§c" .. dir_char .. " §7Conflict"
+
             local rot = client:getCameraRot()
             part:newText("duplicate"):text(text):scale(0.2):outline(true):pos(0,12,0):alignment("CENTER"):rot(rot.x, -rot.y + skull.rot)
 
@@ -224,7 +232,7 @@ function day:tick(skull)
         if songs[redstone_level] and songs[redstone_level] ~= song then
             song = songs[redstone_level]
             self.setters[skull] = true
-            self.time = -1
+            self.time = -2
             return
         end
     end
