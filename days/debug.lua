@@ -5,6 +5,8 @@ local day = Calendar:newDay("debug")
 local missingno = models.model.days.fallback.cube:setPrimaryTexture("RESOURCE", "missingno")
 day:setItemPart(missingno)
 
+local DECEMBER_FIRST = 1701388800000
+local DAY_IN_MS = 86400000
 local function stats()
     return ([[
 §lDebug Info
@@ -15,6 +17,8 @@ local function stats()
 §rParticles: §l%s
 §rSounds: §l%s
 §rTIME: §l%s
+§rDay: §l%s (%s)
+§rNext day in: §l%s
     ]]):format(
         avatar:getInitCount() + avatar:getEntityInitCount(),
         avatar:getTickCount() + avatar:getWorldTickCount(),
@@ -22,7 +26,9 @@ local function stats()
         avatar:getComplexity(),
         avatar:getMaxParticles() - avatar:getRemainingParticles(),
         avatar:getMaxSounds() - avatar:getRemainingSounds(),
-        TIME
+        TIME,
+        Calendar:today() and Calendar:today().name or "no associated mode", Calendar:now(),
+        format.short_time((DAY_IN_MS - (client:getSystemTime() - DECEMBER_FIRST) % DAY_IN_MS) / 1000)
     )
 end
 
