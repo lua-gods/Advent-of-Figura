@@ -1,5 +1,6 @@
 local Skull = require("libraries.Skull")
 local SkullRenderer = require("libraries.SkullRenderer")
+local Debugger = require("libraries.Debugger")
 local calendar = require("libraries.Calendar")
 local manager = require("libraries.SkullManager")
 local mode_getter = require("libraries.mode_getter")
@@ -32,7 +33,7 @@ function events.SKULL_RENDER(delta, blockstate, itemstack, entity, context)
 
     if blockstate then
         if not manager:get(blockstate:getPos()) then
-            manager:add(Skull.new(blockstate, SkullRenderer.new(), chooseDay(blockstate)))
+            manager:add(Skull.new(blockstate, SkullRenderer.new(), Debugger.new(), chooseDay(blockstate)))
         end
     elseif entity and context == "HEAD" then
         local day = mode_getter.fromItem(itemstack) or calendar:today()

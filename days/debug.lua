@@ -8,7 +8,11 @@ day:setItemPart(missingno)
 local function stats()
     local skulls = {}
     for _, skull in next, SkullManager:getAll() do
-        skulls[#skulls+1] = "§7" .. skull.pos.x .. ", " .. skull.pos.y .. ", " .. skull.pos.z .. "§r:§l " .. skull.day.name
+        local info = "§7" .. skull.pos.x .. ", " .. skull.pos.y .. ", " .. skull.pos.z .. "§r:§l " .. skull.day.name
+        if skull.debugger:hasData() then
+            info = info .. " §7(" .. table.concat(skull.debugger:getAll(), ", ") .. ")"
+        end
+        skulls[#skulls+1] = info
     end
     return ([[
 §lDebug Mode
