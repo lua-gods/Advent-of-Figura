@@ -37,13 +37,15 @@ end
 
 local DECEMBER_FIRST = 1701388800000
 local DAY_IN_MS = 86400000
+function Calendar:now()
+    local now = client.getSystemTime()
+    return math.floor((now - DECEMBER_FIRST) / DAY_IN_MS) + 1
+end
+
 ---@return Day
 function Calendar:today()
-    local now = client.getSystemTime()
-    if now < DECEMBER_FIRST then
-        return self:getFallback()
-    end
-    return self:byDate(math.floor((now - DECEMBER_FIRST) / DAY_IN_MS) + 1)
+    local now = self:now()
+    return self:byDate(now)
 end
 
 return Calendar.new()
