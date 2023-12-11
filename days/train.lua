@@ -191,6 +191,9 @@ function day:tick(skull)
          end
       end
    end
+
+   skull.debugger:expose("speed", train and train.speed)
+   skull.debugger:expose("time", train and train.time)
 end
 
 --- when the skull is punched.

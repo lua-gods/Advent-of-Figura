@@ -66,7 +66,7 @@ for i = 1, 5 do
     local texture = textures:copy("snowflake_"..i, base_texture)
     texture:applyFunc(0, 0, dx, dy, function (col, x, y)
         if col.w == 1 then
-            return rng.of(palette)
+            return (rng.of(palette))
         end
     end)
     texture_variants[#texture_variants + 1] = texture
@@ -78,29 +78,36 @@ function day:init(skull, seed)
     skull.data.parts = {}
     local formation_speed = rng.float(0.7,1.1)
     skull.data.seed = seed or 1
-    math.randomseed(skull.pos.x * 56093 + skull.pos.y * 49663 + skull.pos.z * 92791 * (skull.data.seed + skull.rot))
+    local randomseed = skull.pos.x * 56093 + skull.pos.y * 49663 + skull.pos.z * 92791 * (skull.data.seed + skull.rot)
+    math.randomseed(randomseed)
     math.random(); math.random(); math.random()
 
     local root = skull:addPart(models:newPart("snowflakes"))
 
+    local debug_seed = ""
+
     for _ = 1, rng.int(1, 2) do
-        skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(rng.of(variants.core), root):rot(0, rng.step(0, 360, 45), 0), 0.3 * formation_speed)
+        local variant, index = rng.of(variants.core)
+        skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(variant, root):rot(0, rng.step(0, 360, 45), 0), 0.3 * formation_speed)
+        debug_seed = debug_seed .. index
     end
 
     for _ = 1, rng.int(1, 2) do
-        local arm = rng.of(variants.arm1)
+        local arm, index = rng.of(variants.arm1)
         local step = math.random() > 0.5 and 0 or 45
         for i = 0, 3 do
             skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(arm, root):rot(0, 90 * i + step, 0), 0.4 * formation_speed)
         end
+        debug_seed = debug_seed .. index
     end
 
     for _ = 1, rng.int(1, 2) do
-        local arm = rng.of(variants.arm2)
+        local arm, index = rng.of(variants.arm2)
         local step = math.random() > 0.5 and 0 or 45
         for i = 0, 3 do
             skull.data.parts[#skull.data.parts + 1] = tweenIn(skull:addPart(arm, root):rot(0, 90 * i + step, 0), 0.5 * formation_speed)
         end
+        debug_seed = debug_seed .. index
     end
 
     for i = 1, #skull.data.parts do
@@ -112,6 +119,8 @@ function day:init(skull, seed)
     local wall = skull.is_wall_head and -90 or 0
     root:rot(wall, wall > 0 and skull.rot or 0, 0):pos(skull.render_pos * 16 + skull.offset * 15):light(15,15)
     skull.data.root = root
+
+    skull.debugger:expose("seed", debug_seed)
 end
 
 ---@param skull Skull
