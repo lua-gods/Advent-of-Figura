@@ -31,8 +31,11 @@ def process_directory(directory_path):
             midi_file_path = os.path.join(directory_path, filename)
             string_representation = convert_midi_to_string(midi_file_path)
 
-            lua_filename = os.path.splitext(filename)[0] + '.lua'
+            lua_filename = ''.join([c if c.isalnum() else '_' for c in filename.lower()])[:-4] + '.lua'
+            lua_filename = '_'.join([w for w in lua_filename.split('_') if w])
+
             lua_file_path = os.path.join(directory_path, lua_filename)
+
             with open(lua_file_path, 'w') as lua_file:
                 lua_file.write(f"return[[{string_representation}]]")
 
