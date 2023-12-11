@@ -7,7 +7,7 @@ day:setItemPart(missingno)
 
 local function stats()
     return ([[
-§lDebug Mode
+§lDebug Info
 §rInit instructions: §l%s
 §rTick instructions: §l%s
 §rRender instructions: §l%s
@@ -29,13 +29,20 @@ end
 local function skulls()
     local s = {}
     for _, skull in next, SkullManager:getAll() do
-        local info = "§r" .. skull.pos.x .. " " .. skull.pos.y .. " " .. skull.pos.z .. "§r:§l " .. skull.day.name
+        local info = ":skull: §r" .. skull.pos.x .. " " .. skull.pos.y .. " " .. skull.pos.z .. "§r:§l " .. skull.day.name
         if skull.debugger:hasData() then
-            info = info .. "\n §7-§r " .. table.concat(skull.debugger:getAll(), "\n §7-§r ") .. ")"
+            -- info = info .. "\n §7 ├§r " .. table.concat(skull.debugger:getAll(), "\n §7 ├§r ")
+            -- replace the final "├" with "└"
+            local lines = skull.debugger:getAll()
+            local out = ""
+            for i = 1, #lines do
+                out = out .. "\n§7" .. (i == #lines and "└" or "├") .. "§r " .. lines[i]
+            end
+            info = info .. out
         end
         s[#s+1] = info
     end
-    return table.concat(s, "\n")
+    return "§r§lActive Skulls\n§r" .. table.concat(s, "\n") .. "\n\n"
 end
 
 ---@param skull Skull
