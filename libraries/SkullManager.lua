@@ -82,7 +82,7 @@ function SkullManager:init()
 
     event:on("skull_punched", function (pos, puncher)
         local skull = self:get(pos)
-        if skull then
+        if skull and skull:isActive() then
             skull:punch(puncher)
         end
     end)

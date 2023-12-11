@@ -16,8 +16,8 @@ return {
     "jukebox", -- 4P5 (updated)
     "lights", -- 4P5 & Chloe
     "baubles", -- 4P5
-    nil,
-    nil,
+    "dvd", -- Deni
+    "bubbles", -- 4P5
     nil,
     nil,
     nil,
