@@ -1,10 +1,13 @@
 local Calendar = require("libraries.Calendar")
 local tween = require("libraries.GNTweenLib")
+local SkullRenderer = require("libraries.SkullRenderer")
 
 ---@class Day.Jukebox: Day
 ---@field main Skull
 ---@field time integer
+---@field setters table<Skull, boolean>
 local day = Calendar:newDay("jukebox")
+day.setters = {}
 
 day:setItemPart(models.jukebox)
 
@@ -27,27 +30,34 @@ local function parseString(string_representation)
         table.insert(notes[total_time], toMcPitch(note))
     end
 
+    notes.last = total_time + 10
+
     return notes
 end
 
-local n_songs = 0
+local failed_to_add = false
 local songs = {}
 for i, path in next, listFiles("days.songs") do
     local song = {
         title = path:gsub("days%.songs%.",""),
         notes = parseString(require(path))
     }
-    songs[i] = song
-end
+    song.last = song.notes.last
 
-local selected_song = 1
-local song = songs[1]
-local last_note = 0
-for time in pairs(song.notes) do
-    if time > last_note then
-        last_note = time
+    local number = song.title:match("^(%d+)_")
+    if number then
+        songs[tonumber(number)] = song
+    else
+        logJson("\n§cWarning: §r" .. song.title .. " §7wasn't added.")
+        failed_to_add = true
     end
 end
+
+if failed_to_add and IS_HOST then
+    logJson("\n§7The correct format is §r#_song_name§7, where §r#§7 is a signal strength.\n")
+end
+
+local song = songs[0]
 
 ---@type table<string,fun(block : BlockState): boolean?>
 local instrument = {
@@ -175,12 +185,54 @@ function day:globalInit()
     self.time = 0
 end
 
+local was_conflicted = {}
 function day:globalTick()
-    self.time = (self.time + 1) % last_note
+    self.time = (self.time + 1) % song.last
+
+    if next(self.setters, next(self.setters)) then
+        local last = nil
+        for skull, _ in pairs(self.setters) do
+            local part = skull.renderer.parts[1].conflict:primaryRenderType("LINES"):primaryColor(1,0,0) --[[@as ModelPart]]
+            part:pos():matrix(part:getPositionMatrix() * matrices.mat4() * 0.08)
+
+            local other = last or next(self.setters, skull)
+            local my_pos = vectors.worldToScreenSpace(skull.render_pos)
+            local other_pos = vectors.worldToScreenSpace(other.render_pos)
+            local text = my_pos.x < other_pos.x and "§7Conflict§c >" or "§c< §7Conflict"
+            local rot = client:getCameraRot()
+            part:newText("duplicate"):text(text):scale(0.2):outline(true):pos(0,12,0):alignment("CENTER"):rot(rot.x, -rot.y + skull.rot)
+
+            was_conflicted[#was_conflicted+1] = part
+            last = skull
+        end
+    elseif next(was_conflicted) then
+        for i = 1, #was_conflicted do
+            was_conflicted[i]:primaryRenderType("NONE"):removeTask()
+        end
+        was_conflicted = {}
+    end
+
+    self.setters = {}
 end
 
 ---@param skull Skull
 function day:tick(skull)
+    local redstone_level = world.getRedstonePower(skull.pos)
+    if redstone_level == 15 then
+        return
+    elseif redstone_level > 0 then
+        if songs[redstone_level] and songs[redstone_level] ~= song then
+            song = songs[redstone_level]
+            self.setters[skull] = true
+            self.time = -1
+            return
+        end
+    end
+
+    if self.time < 0 then
+        return
+    end
+
     skull.data.instrument = find_instrument(world.getBlockState(skull.pos:copy():sub(0,1,0)))
     local pitches = note(self.time, skull.pos + OFFSET, skull.data.instrument)
     if pitches then
@@ -209,13 +261,13 @@ function day:tick(skull)
 end
 
 function day:punch(skull, puncher)
-    if puncher:getHeldItem().id:find("head") then return end
-    selected_song = selected_song + 1
-    if selected_song > #songs then
-        selected_song = 1
-    end
-    song = songs[selected_song]
-    self.time = 0
+    -- if puncher:getHeldItem().id:find("head") then return end
+    -- selected_song = selected_song + 1
+    -- if selected_song > #songs then
+    --     selected_song = 1
+    -- end
+    -- song = songs[selected_song]
+    -- self.time = 0
 end
 
 ---@param skull Skull
