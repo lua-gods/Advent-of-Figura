@@ -81,7 +81,7 @@ end
 
 local facing_directions = {"north","east","south","west"}
 -- does checking for so many blocks add a lot of instructions on reload? Yes. Do I care? No. Polish is nice ok ;w;
-local denyList = {"head","fence","wall","door","pane","bars","chain","candle","pot","pickle","dragon","bamboo","lily","drip","lantern"}
+local denyList = {"head","fence","wall","door","pane","bars","chain","candle","pot","pickle","dragon","bamboo","lily","drip","lantern","skull"}
 local function reloadSnow(skull)
   local snow_part = skull.data.snowfall.snow
   local snow_template = skull.data.snowfall.templates.snow
