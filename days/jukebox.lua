@@ -39,7 +39,7 @@ local failed_to_add = false
 local songs = {}
 for i, path in next, listFiles("days.songs") do
     local song = {
-        title = path:gsub("days%.songs%.",""),
+        title = path:gsub("days[%.%/]songs[%.%/]",""),
         notes = parseString(require(path))
     }
     song.last = song.notes.last
@@ -58,7 +58,7 @@ if failed_to_add and IS_HOST then
 end
 
 local song = songs[0]
-if Calendar:now() < 16 then
+if Calendar:now() < 16 and not IS_HOST then
     songs = { [0] = song }
 end
 

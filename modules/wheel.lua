@@ -86,7 +86,7 @@ local function giveHead(name)
 end
 
 for _, file in next, listFiles("days") do
-    giveHead(file:gsub("days%.",""))
+    giveHead(file:gsub("days[%.%/]",""))
 end
 
 while #main_page:getActions() % 8 ~= 0 do
