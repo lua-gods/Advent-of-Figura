@@ -48,7 +48,7 @@ function day:init(skull)
     part:addChild(bauble)
 
     delay(function ()
-        local swingable = Swingable3D.new(part)
+        local swingable = Swingable3D.new(part, part:getPos() / 16 + vec(0.5,0,0.5))
         swingable.pos = (part:getPos() / 16) + vec(0.5,-1,0.5)
         swingable._pos = swingable.pos
         swingable.rot = rng.vec3()

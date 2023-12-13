@@ -19,11 +19,11 @@ Swingable3D.__index = Swingable3D
 
 ---@param part ModelPart
 ---@return Swingable3D
-function Swingable3D.new(part)
+function Swingable3D.new(part, pos)
     local self = setmetatable({}, Swingable3D)
     self.part = part
-    self.base = part:partToWorldMatrix():apply()
-    self.pos = part:partToWorldMatrix():apply()
+    self.base = pos:copy()
+    self.pos = pos:copy()
     self._pos = self.pos:copy()
     self.rot = vec(0,0,0)
     self.equilibrium = vec(0,1,0)
