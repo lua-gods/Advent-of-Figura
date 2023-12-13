@@ -37,8 +37,6 @@ local function skulls()
     for _, skull in next, SkullManager:getAll() do
         local info = ":skull: §r" .. skull.pos.x .. " " .. skull.pos.y .. " " .. skull.pos.z .. "§r:§l " .. skull.day.name
         if skull.debugger:hasData() then
-            -- info = info .. "\n §7 ├§r " .. table.concat(skull.debugger:getAll(), "\n §7 ├§r ")
-            -- replace the final "├" with "└"
             local lines = skull.debugger:getAll()
             local out = ""
             for i = 1, #lines do

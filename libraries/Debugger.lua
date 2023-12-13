@@ -16,6 +16,11 @@ end
 function Debugger:getAll()
     local out = {}
     for name, value in next, self.data do
+        if type(value) == "boolean" then
+            value = value and "§atrue" or "§cfalse"
+        else
+            value = tostring(value)
+        end
         out[#out + 1] = ("§r§o%s: %s"):format(name, value)
     end
     return out
