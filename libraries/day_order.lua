@@ -10,14 +10,14 @@ return {    "snowman", -- 4P5
             "vines", -- 4P5
             nil, -- Sky
             "snowflakes", -- 4P5
-            "shelfElf", -- Chloe
+            nil, -- (shelfelf broken)
             "tree", -- GN & Slyme
-            "jukebox", -- 4P5 (updated)
             "lights", -- 4P5 & Chloe
-            "baubles", -- 4P5
+            "jukebox", -- 4P5 & GN (updated)
+            "shelfElf", -- Chloe
             "dvd", -- Deni
             "bubbles", -- 4P5
-            nil,
+            "baubles", -- 4P5
             nil,
             nil,
             nil,
