@@ -7,10 +7,10 @@ local day = Calendar:newDay("boids")
 function day:init(skull)
     skull.data.manager = BoidManager.new()
     skull.data.models = {}
-    for i = 1, 100 do
-        local boid = skull.data.manager:newBoid(skull.pos + rng.vec3() * 5)
+    for i = 1, 80 do
+        local boid = skull.data.manager:newBoid(skull.pos + rng.vec3().x_z:normalize() * 10 + vec(0, 10, 0))
         boid.vel = rng.vec3() * 0.001
-        skull.data.models[i] = skull:addPart(models.boids.boid):scale(0.3)
+        skull.data.models[i] = skull:addPart(models.boids.boid):scale(0.8)
     end
     skull.data.manager:setTarget(skull.pos + vec(0, 4, 0))
 end

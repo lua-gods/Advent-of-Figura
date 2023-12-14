@@ -11,7 +11,7 @@ BoidManager.__index = BoidManager
 function BoidManager.new()
     local self = setmetatable({}, BoidManager)
     self.boids = {}
-    self.lsh = LSH.new(100, 3)
+    self.lsh = LSH.new(50, 3)
     return self
 end
 

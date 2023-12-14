@@ -119,11 +119,11 @@ if raycast then
     end
 end
 
-local RAYS = 5
+local RAYS = 2
 function Boid:avoid()
     local avoid = vec(0,0,0)
     for i = 1, RAYS do
-        local hit = cast(self.pos, self.dir + rng.vec3() * 0.4)
+        local hit = cast(self.pos, self.dir + rng.vec3() * 0.3)
         avoid = avoid + (self.pos - hit):normalize()
     end
     return avoid / RAYS
@@ -143,18 +143,18 @@ function Boid:seek(target, when_over)
     return steer
 end
 
-local separation_scalar = 1.5
-local alignment_scalar = 1.0
+local separation_scalar = 2.5
+local alignment_scalar = 1.5
 local cohesion_scalar = 1.5
 local seek_scalar = 0.5
-local avoid_scalar = 1.0
+local avoid_scalar = 16.0
 
 ---@param target Vector3
 function Boid:applyForces(neighbours, target)
-    local separation_force = self:separate(neighbours, 1.5)
-    local alignment_force = self:align(neighbours, 2)
-    local cohesion_force = self:cohere(neighbours, 1.5)
-    local seek_force = self:seek(target, 8)
+    local separation_force = self:separate(neighbours, 3)
+    local alignment_force = self:align(neighbours, 4)
+    local cohesion_force = self:cohere(neighbours, 6)
+    local seek_force = self:seek(target, 16)
     local avoid_force = self:avoid()
 
     self.acc = self.acc + self.dir * 0.5
@@ -166,14 +166,26 @@ function Boid:applyForces(neighbours, target)
     self.acc = self.acc + (avoid_force * avoid_scalar)
 end
 
+local SPEED_LIMIT = 0.3
+function Boid:pleaseObeyAllTrafficRegulations()
+    local speed = self.vel:length()
+    if speed > SPEED_LIMIT then
+        self.vel = self.vel / speed * SPEED_LIMIT
+    end
+end
+
 ---@param target Vector3
 function Boid:tick(neighbours, target)
     self:applyForces(neighbours, target)
     self._pos = self.pos
     self._dir = self.dir
-    self.pos = self.pos + self.vel
+
     self.acc = self.acc * 0.01
-    self.vel = self.vel + self.acc
+    self.vel = self.vel + self.acc * 0.5
+
+    self:pleaseObeyAllTrafficRegulations()
+
+    self.pos = self.pos + self.vel
     self.acc = vec(0,0,0)
     self.dir = math.lerp(self.dir, self.vel, 0.2) --[[@as Vector3]]
 end
