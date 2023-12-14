@@ -107,11 +107,23 @@ local function cast(pos, dir)
     return pos
 end
 
-local RAYS = 1
+---@diagnostic disable-next-line: undefined-global
+if raycast then
+    ---@param pos Vector3
+    ---@param dir Vector3
+    ---@return Vector3?
+    function cast(pos, dir)
+        ---@diagnostic disable-next-line: undefined-global
+        local block, hit = raycast:block("COLLIDER", nil, pos, pos + dir * RAYCAST_MAX)
+        return block:isAir() and pos or hit
+    end
+end
+
+local RAYS = 5
 function Boid:avoid()
     local avoid = vec(0,0,0)
     for i = 1, RAYS do
-        local hit = cast(self.pos, self.vel + rng.vec3() * 0.5)
+        local hit = cast(self.pos, self.dir + rng.vec3() * 0.4)
         avoid = avoid + (self.pos - hit):normalize()
     end
     return avoid / RAYS
@@ -135,7 +147,7 @@ local separation_scalar = 1.5
 local alignment_scalar = 1.0
 local cohesion_scalar = 1.5
 local seek_scalar = 0.5
-local avoid_scalar = 1.5
+local avoid_scalar = 1.0
 
 ---@param target Vector3
 function Boid:applyForces(neighbours, target)
