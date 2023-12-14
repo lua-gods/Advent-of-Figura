@@ -35,14 +35,35 @@ local function parseString(string_representation)
     return notes
 end
 
+local function lazyLoadNotes(path)
+    local notes
+    return function()
+        if not notes then
+            notes = parseString(require(path))
+        end
+        return notes
+    end
+end
+
 local failed_to_add = false
 local songs = {}
 for i, path in next, listFiles("days.songs") do
     local song = {
-        title = path:gsub("days[%.%/]songs[%.%/]",""),
-        notes = parseString(require(path))
+        title = path:gsub("days[%.%/]songs[%.%/]", ""),
+        lazy_notes = lazyLoadNotes(path)
     }
-    song.last = song.notes.last
+
+    setmetatable(song, {
+        __index = function(t, key)
+            if key == "notes" then
+                return t.lazy_notes()
+            elseif key == "last" then
+                return t.lazy_notes().last
+            else
+                return rawget(t, key)
+            end
+        end
+    })
 
     local number = song.title:match("^(%d+)_")
     if number then
