@@ -79,7 +79,7 @@ if failed_to_add and IS_HOST then
 end
 
 local song = songs[0]
-if Calendar:now() < 16 and not IS_HOST then
+if Calendar:now() < 17 and not IS_HOST then
     songs = { [0] = song }
 end
 

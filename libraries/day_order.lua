@@ -13,12 +13,12 @@ return {    "snowman", -- 4P5
             nil, -- (shelfelf broken)
             "tree", -- GN & Slyme
             "lights", -- 4P5 & Chloe
-            "jukebox", -- 4P5 & GN (updated)
-            "shelfElf", -- Chloe
             "dvd", -- Deni
+            "jukebox", -- 4P5 & GN (updated)
             "bubbles", -- 4P5
+            "shelfElf", -- Chloe
+            "boids", -- 4P5
             "baubles", -- 4P5
-            nil,
             nil,
             nil,
             nil,
