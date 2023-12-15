@@ -30,7 +30,7 @@ local function parseString(string_representation)
         table.insert(notes[total_time], toMcPitch(note))
     end
 
-    notes.last = total_time + 10
+    notes.last = total_time + 20
 
     return notes
 end
@@ -257,7 +257,6 @@ local function bounce(skull)
         tween.tweenFunction(skull.data.anim_time,0.25,0.15,"outBack",function(x)
             skull.data.anim_time = x --[[@as number]]
             skull.renderer.parts[1]:setScale(1/(1+x),1+x,1/(1+x))
-            
         end,function()
             tween.tweenFunction(.25,0,0.5,"outSine",function(x)
                 skull.data.anim_time = x --[[@as number]]
@@ -312,6 +311,7 @@ end
 
 ---@param skull Skull
 function day:tick(skull)
+    if not song then return end
     local redstone_level = world.getRedstonePower(skull.pos)
     if redstone_level == 15 then
         return
