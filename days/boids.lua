@@ -1,9 +1,9 @@
 local Calendar = require("libraries.Calendar")
 local BoidManager = require("libraries.BoidManager")
 
-local w = 32
-local h = 32
-local ITERATIONS = 32
+local w = 8
+local h = 8
+local ITERATIONS = 16
 
 local GREEN = vec(0,1,0,1)
 local DARK_GREEN = vec(0,0.5,0,1)
@@ -42,17 +42,22 @@ for i = 1, ITERATIONS do
 end
 
 local day = Calendar:newDay("boids")
+local boid_models = {}
+
+local manager = BoidManager.new()
 
 ---@param skull Skull
 function day:init(skull)
-    skull.data.manager = BoidManager.new()
-    skull.data.models = {}
-    for i = 1, 60 do
-        local boid = skull.data.manager:newBoid(skull.pos + rng.vec3().x_z:normalize() * 50 + rng.vec3() * 20 + vec(0, 50, 0))
+    skull.data.my_boids = {}
+    skull.data.seed = math.random() * 10000
+
+    for i = 1, 20 do
+        local boid = manager:newBoid(skull.pos + rng.vec3().x_z:normalize() * 50 + rng.vec3() * 20 + vec(0, 50, 0))
         boid.vel = rng.vec3()
-        skull.data.models[i] = skull:addPart(models.boids.boid):scale(0.8)
+        boid_models[boid] = skull:addPart(models.boids.boid):scale(0.8)
+        skull.data.my_boids[i] = boid
     end
-    skull.data.manager:setTarget(skull.pos + vec(0, 4, 0))
+    manager:setTarget(skull.pos + vec(0, 4, 0))
 
     skull.data.copies = {}
     local base = skull:addPart(models:newPart("piv"))
@@ -69,20 +74,16 @@ end
 
 ---@param skull Skull
 function day:tick(skull)
-    skull.data.manager:tick()
-
-    for i = 1, #skull.data.manager.boids do
-        local boid = skull.data.manager.boids[i]
+    for i = 1, #manager.boids do
+        local boid = manager.boids[i]
         local pos = boid.pos
         if (pos - skull.pos):lengthSquared() < 3^2 then
-            for _ = 1, rng.int(1,3) do
-                skull.data.food_orbs[#skull.data.food_orbs+1] = {
-                    time = 0,
-                    particle = particles["end_rod"]:pos(skull.pos + vec(0.5, 0.5, 0.5) + rng.vec3() * 0.5):lifetime(999):color(vec(rng.float(0,0.2),rng.float(0.5,1),rng.float(0,0.2))):spawn(),
-                    target = boid,
-                    vel = rng.vec3() * 0.05
-                }
-            end
+            skull.data.food_orbs[#skull.data.food_orbs+1] = {
+                time = 0,
+                particle = particles["end_rod"]:pos(skull.pos + vec(0.5, 0.5, 0.5) + rng.vec3() * 0.5):lifetime(999):color(vec(rng.float(0,0.2),rng.float(0.5,1),rng.float(0,0.2))):spawn(),
+                target = boid,
+                vel = rng.vec3() * 0.05
+            }
         end
     end
 
@@ -107,31 +108,23 @@ function day:tick(skull)
 end
 
 ---@param skull Skull
----@param puncher Player
-function day:punch(skull,puncher)
-
-end
-
----@param skull Skull
 ---@param delta number
 function day:render(skull, delta)
-    local boids = skull.data.manager.boids
-    for i = 1, #boids do
-        local boid = boids[i]
-        skull.data.models[i]:pos(boid:getPos(delta) * 16 + vec(-8,0,-8))
-        skull.data.models[i]:rot(boid:getRot(delta))
-    end
-
     local time = client.getSystemTime() / 50
     for i = 1, #skull.data.copies do
-        local v = 0.2 + (math.sin(time / 2 + (i * 0.3)) - 0.5) * 0.2
+        local v = 0.3 + (math.sin(skull.data.seed + (time / 2 + (i * 0.3))) - 0.5) * 0.2
         skull.data.copies[i]:pos(v * 0.2, v, v * 0.2)
     end
 end
 
 ---@param skull Skull
 function day:exit(skull)
-
+    for i = 1, #skull.data.food_orbs do
+        skull.data.food_orbs[i].particle:remove()
+    end
+    for i = 1, #skull.data.my_boids do
+        manager:removeBoid(skull.data.my_boids[i])
+    end
 end
 
 ---@param skulls Skull[]
@@ -141,13 +134,18 @@ end
 
 ---@param skulls Skull[]
 function day:globalTick(skulls)
-
+    manager:tick()
 end
 
 ---@param skulls Skull[]
 ---@param delta number
 function day:globalRender(skulls, delta)
-
+    local boids = manager.boids
+    for i = 1, #boids do
+        local boid = boids[i]
+        boid_models[boid]:pos(boid:getPos(delta) * 16 + vec(-8,0,-8))
+        boid_models[boid]:rot(boid:getRot(delta))
+    end
 end
 
 ---@param skulls Skull[]

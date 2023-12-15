@@ -11,7 +11,7 @@ BoidManager.__index = BoidManager
 function BoidManager.new()
     local self = setmetatable({}, BoidManager)
     self.boids = {}
-    self.lsh = LSH.new(30, 3)
+    self.lsh = LSH.new(50, 3)
     return self
 end
 
@@ -28,6 +28,15 @@ function BoidManager:newBoid(pos)
     boid.pos = pos
     self:addBoid(boid)
     return boid
+end
+
+function BoidManager:removeBoid(boid)
+    for i = 1, #self.boids do
+        if self.boids[i] == boid then
+            table.remove(self.boids, i)
+            return
+        end
+    end
 end
 
 function BoidManager:clear()
