@@ -143,17 +143,17 @@ function Boid:seek(target, when_over)
     return steer
 end
 
-local separation_scalar = 2.5
-local alignment_scalar = 1.5
-local cohesion_scalar = 1.5
-local seek_scalar = 0.5
+local separation_scalar = 5.5
+local alignment_scalar = 2.5
+local cohesion_scalar = 3.5
+local seek_scalar = 0.3
 local avoid_scalar = 16.0
 
 ---@param target Vector3
 function Boid:applyForces(neighbours, target)
     local separation_force = self:separate(neighbours, 3)
-    local alignment_force = self:align(neighbours, 4)
-    local cohesion_force = self:cohere(neighbours, 6)
+    local alignment_force = self:align(neighbours, 5)
+    local cohesion_force = self:cohere(neighbours, 8)
     local seek_force = self:seek(target, 16)
     local avoid_force = self:avoid()
 
@@ -166,7 +166,7 @@ function Boid:applyForces(neighbours, target)
     self.acc = self.acc + (avoid_force * avoid_scalar)
 end
 
-local SPEED_LIMIT = 0.3
+local SPEED_LIMIT = 0.5
 function Boid:pleaseObeyAllTrafficRegulations()
     local speed = self.vel:length()
     if speed > SPEED_LIMIT then
