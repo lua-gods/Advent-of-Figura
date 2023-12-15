@@ -144,17 +144,17 @@ function Boid:seek(target, when_over)
 end
 
 local separation_scalar = 5.5
-local alignment_scalar = 2.5
-local cohesion_scalar = 3.5
+local alignment_scalar = 3.5
+local cohesion_scalar = 4.0
 local seek_scalar = 0.3
 local avoid_scalar = 16.0
 
 ---@param target Vector3
 function Boid:applyForces(neighbours, target)
     local separation_force = self:separate(neighbours, 3)
-    local alignment_force = self:align(neighbours, 5)
-    local cohesion_force = self:cohere(neighbours, 8)
-    local seek_force = self:seek(target, 16)
+    local alignment_force = self:align(neighbours, 6)
+    local cohesion_force = self:cohere(neighbours, 9)
+    local seek_force = self:seek(target, 8)
     local avoid_force = self:avoid()
 
     self.acc = self.acc + self.dir * 0.5

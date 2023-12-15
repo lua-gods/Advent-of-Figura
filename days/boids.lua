@@ -47,7 +47,7 @@ local day = Calendar:newDay("boids")
 function day:init(skull)
     skull.data.manager = BoidManager.new()
     skull.data.models = {}
-    for i = 1, 50 do
+    for i = 1, 60 do
         local boid = skull.data.manager:newBoid(skull.pos + rng.vec3().x_z:normalize() * 50 + rng.vec3() * 20 + vec(0, 50, 0))
         boid.vel = rng.vec3()
         skull.data.models[i] = skull:addPart(models.boids.boid):scale(0.8)
@@ -74,20 +74,23 @@ function day:tick(skull)
     for i = 1, #skull.data.manager.boids do
         local boid = skull.data.manager.boids[i]
         local pos = boid.pos
-        if (pos - skull.pos):lengthSquared() < 8^2 then
-            skull.data.food_orbs[#skull.data.food_orbs+1] = {
-                time = 0,
-                particle = particles["end_rod"]:pos(skull.pos + rng.vec3() * 0.5):lifetime(999):color(vec(rng.float(0,0.2),rng.float(0.5,1),rng.float(0,0.2))):spawn(),
-                target = boid,
-                vel = rng.vec3() * 0.05
-            }
+        if (pos - skull.pos):lengthSquared() < 3^2 then
+            for _ = 1, rng.int(1,3) do
+                skull.data.food_orbs[#skull.data.food_orbs+1] = {
+                    time = 0,
+                    particle = particles["end_rod"]:pos(skull.pos + vec(0.5, 0.5, 0.5) + rng.vec3() * 0.5):lifetime(999):color(vec(rng.float(0,0.2),rng.float(0.5,1),rng.float(0,0.2))):spawn(),
+                    target = boid,
+                    vel = rng.vec3() * 0.05
+                }
+            end
         end
     end
 
     for i = #skull.data.food_orbs, 1, -1 do
         local orb = skull.data.food_orbs[i]
         orb.time = orb.time + 1
-        if orb.time > 200 then
+        if orb.time > 400 then
+            particles["falling_water"]:pos(orb.particle:getPos()):spawn()
             orb.particle:remove()
             table.remove(skull.data.food_orbs, i)
         else
@@ -95,7 +98,7 @@ function day:tick(skull)
             orb.vel = orb.vel + (orb.target.pos - pos):normalize() * 0.02
             orb.particle:velocity(orb.vel)
             if (pos - orb.target.pos):lengthSquared() < 2 then
-                particles["dripping_water"]:pos(pos):spawn()
+                particles["falling_water"]:pos(pos):spawn()
                 orb.particle:remove()
                 table.remove(skull.data.food_orbs, i)
             end
