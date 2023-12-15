@@ -1,6 +1,8 @@
 local Calendar = require("libraries.Calendar")
 local BoidManager = require("libraries.BoidManager")
 
+local DEER_LIMIT = 100
+
 local w = 8
 local h = 8
 local ITERATIONS = 16
@@ -51,7 +53,10 @@ function day:init(skull)
     skull.data.my_boids = {}
     skull.data.seed = math.random() * 10000
 
-    for i = 1, 20 do
+    for i = 1, 30 do
+        if #manager.boids > DEER_LIMIT then
+            break
+        end
         local boid = manager:newBoid(skull.pos + rng.vec3().x_z:normalize() * 50 + rng.vec3() * 20 + vec(0, 50, 0))
         boid.vel = rng.vec3()
         boid_models[boid] = skull:addPart(models.boids.boid):scale(0.8)
