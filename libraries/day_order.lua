@@ -14,10 +14,10 @@ return {    "snowman", -- 4P5
             "tree", -- GN & Slyme
             "lights", -- 4P5 & Chloe
             "dvd", -- Deni
+            "boids", -- 4P5
             "jukebox", -- 4P5 & GN (updated)
             "bubbles", -- 4P5
             "shelfElf", -- Chloe
-            "boids", -- 4P5
             "baubles", -- 4P5
             nil,
             nil,
