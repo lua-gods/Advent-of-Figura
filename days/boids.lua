@@ -1,7 +1,8 @@
 local Calendar = require("libraries.Calendar")
 local BoidManager = require("libraries.BoidManager")
 
-local DEER_LIMIT = 100
+local SOFT_LIMIT = 100
+local HARD_LIMIT = 500
 
 local w = 8
 local h = 8
@@ -54,7 +55,9 @@ function day:init(skull)
     skull.data.seed = math.random() * 10000
 
     for i = 1, 30 do
-        if #manager.boids > DEER_LIMIT then
+        if #manager.boids > SOFT_LIMIT and i > 10 then
+            break
+        elseif #manager.boids > HARD_LIMIT then
             break
         end
         local boid = manager:newBoid(skull.pos + rng.vec3().x_z:normalize() * 50 + rng.vec3() * 20 + vec(0, 50, 0))
@@ -110,6 +113,10 @@ function day:tick(skull)
             end
         end
     end
+
+    skull.debugger:expose("my_orbs", #skull.data.food_orbs)
+    skull.debugger:expose("my_boids", #skull.data.my_boids)
+    skull.debugger:expose("total_boids", #manager.boids)
 end
 
 ---@param skull Skull
