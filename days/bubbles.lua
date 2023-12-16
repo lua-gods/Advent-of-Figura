@@ -10,7 +10,7 @@ end
 
 ---@param skull Skull
 function day:tick(skull)
-    local pos = skull.data.part.Gun:partToWorldMatrix():apply(2,2,9.5)
+    local pos = skull.pos + vec(0.5,0.5,0.5) + vec(0,0.3,0) + vec(math.sin((TIME + 2)/10),0,math.cos((TIME + 2)/10)) * 0.5
     if math.random() > 0.6 then
         Bubble.new(pos, vec(0,0.1,0) + vec(math.sin(TIME/10),0,math.cos(TIME/10)) * 0.12)
         for _ = 1, 3 do
@@ -39,7 +39,7 @@ end
 ---@param skull Skull
 ---@param delta number
 function day:render(skull, delta)
-    skull.data.part.Gun:rot(utils.dirToAngle(vec(math.sin((TIME + delta)/10),0.6,math.cos((TIME + delta)/10))) + vec(0,-180,0))
+    skull.data.part.Gun:rot(utils.dirToAngle(vec(math.sin((TIME + delta)/10),0.6,math.cos((TIME + delta)/10))) + vec(0,0,0))
 end
 
 ---@param skull Skull
