@@ -6,8 +6,10 @@ local SkullRenderer = require("libraries.SkullRenderer")
 ---@field main Skull
 ---@field time integer
 ---@field setters table<Skull, boolean>
+---@field e_providers table<Skull, boolean>
 local day = Calendar:newDay("jukebox")
 day.setters = {}
+day.e_providers = {}
 
 day:setItemPart(models.jukebox)
 
@@ -228,7 +230,8 @@ function day:init(skull)
     skull.data.instrument = find_instrument(world.getBlockState(skull.pos:copy():sub(0,1,0)))
     skull.data.anim_time = 0
     skull.data.particles = {}
-    skull.data.e = e(skull.pos)
+    self.e = e(skull.pos)
+    self.e_providers[skull] = true
     skull.data.stress = 0
 end
 
@@ -321,20 +324,30 @@ function day:tick(skull)
     if math.abs(diff) > 1 then
         sounds["minecraft:entity.item_frame.break"]:pos(skull.render_pos):volume(0.5):pitch(0.5 - diff * 0.005 - torch_rot.z * 0.005):play()
     end
-    if redstone_level == 15 then
-        return
-    elseif redstone_level > 0 then
-        if songs[redstone_level] and songs[redstone_level] ~= song then
-            song = songs[redstone_level]
-            self.setters[skull] = true
+    if self.e then
+        if song ~= songs[600] then
+            song = songs[600]
             self.time = -10
             return
+        end
+    else
+        if redstone_level == 15 then
+            return
+        elseif redstone_level > 0 then
+            if songs[redstone_level] and songs[redstone_level] ~= song then
+                song = songs[redstone_level]
+                self.setters[skull] = true
+                self.time = -10
+                return
+            end
         end
     end
 
     if skull.data.stress > 0 then
-        skull.data.stress = skull.data.stress - 0.005
+        skull.data.stress = skull.data.stress * 0.985
+        host:setActionbar(skull.data.stress.."")
     end
+
     if self.time < 0 then
         return
     elseif self.time == 0 then
@@ -342,7 +355,45 @@ function day:tick(skull)
         sounds["minecraft:entity.fishing_bobber.retrieve"]:pos(skull.render_pos):volume(2):pitch(0.6):play()
         sounds["minecraft:entity.fishing_bobber.retrieve"]:pos(skull.render_pos):volume(2):pitch(0.7):play()
     end
-    skull.renderer.parts[1]:setPos((skull.pos * 16):add((math.random() - 0.5) * skull.data.stress,0,(math.random() - 0.5) * skull.data.stress))
+
+    local box = skull.renderer.parts[1]
+    box:color(math.lerp(vec(1,1,1), vec(1,0,0), math.min((skull.data.stress * 0.08), 1)))
+    box:secondaryRenderType(skull.data.stress > 30 and "GLINT2" or "NONE")
+    if skull.data.stress > 0.6 then
+        particles["smoke"]:pos(skull.render_pos + OFFSET + rng.vec3() * 0.5):velocity(rng.vec3() * 0.05 + vec(0,0.05,0)):scale(0.5):spawn()
+    end
+    if skull.data.stress > 0.65 then
+        particles["smoke"]:pos(skull.render_pos + OFFSET + rng.vec3() * 0.5):velocity(rng.vec3() * 0.15 + vec(0,0.05,0)):scale(0.5):spawn()
+        if math.random() > 0.9 then
+            particles["flame"]:pos(skull.render_pos + OFFSET + rng.vec3() * 0.5):velocity(rng.vec3() * 0.05 + vec(0,0.05,0)):scale(0.5):spawn()
+        end
+    end
+    if skull.data.stress > 15 then
+        for _ = 1, 5 do
+            particles["smoke"]:pos(skull.render_pos + OFFSET + rng.vec3() * 0.5):velocity(rng.vec3() * 0.8 + vec(0,0.05,0)):scale(0.5):spawn()
+        end
+        if math.random() > 0.9 then
+            particles["lava"]:pos(skull.render_pos + OFFSET + rng.vec3() * 0.5):velocity(rng.vec3() * 0.05 + vec(0,0.05,0)):scale(0.5):spawn()
+        end
+    end
+    if skull.data.stress > 30 then
+        particles["flame"]:pos(skull.render_pos + OFFSET + rng.vec3() * 0.5):velocity(rng.vec3() * 0.5 + vec(0,0.05,0)):scale(0.5):spawn()
+        for _ = 1, 5 do
+            particles["lava"]:pos(skull.render_pos + OFFSET + rng.vec3() * 0.5):velocity(rng.vec3() * 0.5 + vec(0,0.05,0)):scale(0.8):spawn()
+        end
+        for _ = 1, 20 do
+            particles["smoke"]:pos(skull.render_pos + OFFSET + rng.vec3() * 0.5):velocity(rng.vec3() * 0.8 + vec(0,0.05,0)):scale(0.5):spawn()
+        end
+    end
+    if skull.data.stress > 48 then
+        for _ = 1, 10 do
+            particles["flame"]:pos(skull.render_pos + OFFSET + rng.vec3() * 0.5):velocity(rng.vec3() * 0.15 + vec(0,rng.float(1,4),0)):scale(1):spawn()
+            particles["lava"]:pos(skull.render_pos + OFFSET + rng.vec3() * 0.5):velocity(rng.vec3() * 0.15 + vec(0,rng.float(1,4),0)):scale(0.5):spawn()
+        end
+        if math.random() > 0.9 then
+            sounds["entity.lightning_bolt.thunder"]:pos(skull.pos):volume(0.5):pitch(rng.float(2,4)):play()
+        end
+    end
     skull.data.instrument = find_instrument(world.getBlockState(skull.pos:copy():sub(0,1,0)))
     local pitches = note(self.time, skull.pos + OFFSET, skull.data.instrument)
     if pitches then
@@ -353,7 +404,7 @@ function day:tick(skull)
                 lifetime = lifetime,
                 max_lifetime = lifetime
             }
-            skull.data.stress = skull.data.stress + 0.01
+            skull.data.stress = math.min(skull.data.stress + 0.01, 50)
         end
         bounce(skull)
     end
@@ -375,6 +426,14 @@ function day:tick(skull)
     return pitches and true or false
 end
 
+function day:render(skull, delta)
+    local box = skull.renderer.parts[1]
+    if skull.data.stress > 0.3 then
+        local stress = skull.data.stress - 0.3
+        box:offsetRot(rng.float(-0.5,0.5) * stress, rng.float(-1.5,1.5) * stress, rng.float(-0.5,0.5) * stress)
+    end
+end
+
 function day:punch(skull, puncher)
     -- if puncher:getHeldItem().id:find("head") then return end
     -- selected_song = selected_song + 1
@@ -389,5 +448,16 @@ end
 function day:exit(skull)
     for i = #skull.data.particles, 1, -1 do
         skull.data.particles[i].particle:remove()
+    end
+    if self.e_providers[skull] then
+        self.e_providers[skull] = nil
+        local count = 0
+        for _ in pairs(self.e_providers) do
+            count = count + 1
+        end
+        if count == 0 then
+            self.e = false
+            song = songs[0]
+        end
     end
 end
