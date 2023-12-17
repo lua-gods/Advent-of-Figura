@@ -47,7 +47,15 @@ end
 local day = Calendar:newDay("boids")
 local boid_models = {}
 
-local manager = BoidManager.new()
+local manager = BoidManager.new({
+    max_speed = 0.5,
+    desired_separation = 3,
+    neighbor_dist = 8,
+    alignment_weight = 3.5,
+    cohesion_weight = 4.0,
+    separation_weight = 5.5,
+    seek_weight = 0.3,
+})
 
 ---@param skull Skull
 function day:init(skull)
