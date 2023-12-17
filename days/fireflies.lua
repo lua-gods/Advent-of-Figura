@@ -5,6 +5,9 @@ local BoidManager = require("libraries.BoidManager")
 local day = Calendar:newDay("fireflies")
 day.n_boids = 0
 
+day:setItemPart(models.boids.frog)
+day:addWornPart(models.boids.frog)
+
 local FOLLOWERS_PER_LEADER = 20
 local MAX_FIREFLIES = 10
 local GLOBAL_MAX = 100
@@ -35,12 +38,12 @@ function day:init(skull)
         if day.n_boids > GLOBAL_MAX then
             break
         end
-        local boid = manager:newBoid(skull.pos + rng.vec3() * 1 + vec(0,5,0))
+        local boid = manager:newBoid(skull.pos + rng.vec3() * 5 + vec(0,5,0))
         boid.vel = rng.vec3() * 0.1
         skull.data.boids[i] = boid
         followers[boid] = {}
         for j = 1, FOLLOWERS_PER_LEADER do
-            local follower = particles["end_rod"]:pos(boid.pos + rng.vec3()):physics(false):lifetime(300000):scale(0.5):spawn()
+            local follower = particles["end_rod"]:pos(boid.pos + rng.vec3() * 20):physics(false):lifetime(300000):scale(0):spawn()
             followers[boid][j] = {
                 particle = follower,
                 velocity = rng.vec3() * 0.01,
@@ -54,6 +57,9 @@ function day:init(skull)
     skull.data.swing_duration = 0
     skull.data.extending = false
     skull.data.retracting = false
+    skull.data.frog_rot = vec(0,0,0)
+    skull.data._frog_rot = vec(0,0,0)
+    skull.data.puff = 0
 
     manager:setTarget(skull.pos + vec(0, 4, 0))
 end
@@ -65,7 +71,7 @@ end
 local TIME_TO_SWING = 8
 
 function day:tick(skull)
-    if TIME % 60 == 0 then
+    if TIME % 10 == 0 and math.random() > 0.9 then
         skull.data.frog_target = rng.of(skull.data.boids)
         skull.data.swing_duration = 0
         skull.data.extending = true
@@ -106,9 +112,19 @@ function day:tick(skull)
                     particles["item rotten_flesh"]:pos(pos + rng.vec3() * 0.1):scale(0.25):velocity(rng.vec3() * 0.1):spawn()
                 end
                 child.particle:pos(skull.pos + vec(0.5, 3.5, 0.5) + rng.vec3():normalize() * 32)
+                skull.data.puff = math.min(skull.data.puff + 1, 20)
             end
         end
     end
+
+    if skull.data.frog_target then
+        local rot = utils.dirToAngle(skull.data.frog_target.pos - skull.pos)
+        skull.data._frog_rot = skull.data.frog_rot
+        skull.data.frog_rot = math.lerpAngle(skull.data.frog_rot, vec(-rot.x * 0.1, rot.y + 180, 0), 0.2)
+    end
+
+    skull.data.frog.croaking_body:scale(1 + skull.data.puff / 20)
+    skull.data.puff = math.max(skull.data.puff - 0.1, 0)
 end
 
 function day:exit(skull)
@@ -128,10 +144,11 @@ function day:render(skull, delta)
     for boid, particle in pairs(skull.data.particles) do
         particle:pos(boid:getPos(delta))
     end
+
     if skull.data.frog_target then
         local rot = utils.dirToAngle(skull.data.frog_target.pos - skull.pos)
         local diff = (skull.data.frog_target.pos - skull.pos):length()
-        skull.data.frog:rot(-rot.x * 0.1, rot.y + 180, 0)
+        skull.data.frog:rot(math.lerpAngle(skull.data._frog_rot, skull.data.frog_rot, delta))
         if skull.data.swing_duration > 0 then
             local offset = (skull.data.extending or skull.data.retracting) and (skull.data.swing_duration + (skull.data.retracting and -delta or delta)) or 0
             offset = smooth(offset / TIME_TO_SWING)
@@ -140,6 +157,12 @@ function day:render(skull, delta)
         else
             skull.data.frog.head.tongue:scale(1,1,1)
         end
+
+        local angular_velocity = math.shortAngle(skull.data._frog_rot.y, skull.data.frog_rot.y)
+        skull.data.frog.left_leg:rot((math.sin(TIME / 8)) * math.clamp(angular_velocity, -5, 5) * 20 - 10, 0, 0)
+        skull.data.frog.right_leg:rot((math.cos(TIME / 8)) * math.clamp(angular_velocity, -5, 5) * 20 - 10, 0, 0)
+        skull.data.frog.left_arm:rot((math.cos(TIME / 8)) * math.clamp(angular_velocity, -5, 5) * 20 - 10, 0, 0)
+        skull.data.frog.right_arm:rot((math.sin(TIME / 8)) * math.clamp(angular_velocity, -5, 5) * 20 - 10, 0, 0)
     end
 end
 
@@ -162,7 +185,7 @@ function day:globalTick(skulls)
         for j = 1, #children do
             local child = children[j]
             child.velocity = (child.velocity + (pos - (child.particle:getPos() + child.offset)):normalize() * 0.008) * 0.98
-            child.particle:velocity(child.velocity):color(math.lerp(vec(1,1,0), vec(0.2,0.2,0.2), map(math.sin((TIME + j * 2 + i * 2) * 0.1) * 0.5 + 0.5)))
+            child.particle:velocity(child.velocity):color(math.lerp(vec(1,1,0), vec(0.2,0.2,0.2), map(math.sin((TIME + j * 2 + i * 2) * 0.1) * 0.5 + 0.5))):scale(math.lerp(child.particle:getScale(), math.sin(TIME * 0.1 + i * 0.1) * 0.1 + 0.4, 0.1))
         end
     end
 end
