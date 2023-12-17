@@ -39,7 +39,7 @@ end
 ---@param skull Skull
 ---@param delta number
 function day:render(skull, delta)
-    skull.data.part.Gun:rot(utils.dirToAngle(vec(math.sin((TIME + delta)/10),0.6,math.cos((TIME + delta)/10))) + vec(0,0,0))
+    skull.data.part.Gun:rot(utils.dirToAngle(vec(math.sin((TIME + delta)/10),0.6,math.cos((TIME + delta)/10))) + vec(0,skull.rot,0))
 end
 
 ---@param skull Skull
