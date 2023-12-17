@@ -36,7 +36,7 @@ function Boid:separate(neighbours, desired_separation)
             local diff = offset:copy()
             local dist = d_sq ^ 0.5
             diff = diff / dist
-            steer = steer + diff
+            steer:add(diff)
             count = count + 1
         end
     end
@@ -49,21 +49,21 @@ end
 ---@param neighbours Boid[]
 ---@param neighbor_dist number
 function Boid:align(neighbours, neighbor_dist)
+    neighbor_dist = neighbor_dist ^ 2
     local sum = vec(0, 0, 0)
     local count = 0
     for i = 1, #neighbours do
         if count >= MAX_NEIGHBOURS then break end
         local other = neighbours[i]
-        local d = (self.pos - other.pos):length()
+        local d = (self.pos - other.pos):lengthSquared()
         if d > 0 and d < neighbor_dist then
-            sum = sum + other.vel
+            sum:add(other.vel)
             count = count + 1
         end
     end
     if count > 0 then
         sum = sum / count
-        sum:normalize()
-        return sum
+        return sum:normalize()
     else
         return vec(0, 0, 0)
     end
@@ -92,13 +92,13 @@ function Boid:cohere(neighbours, neighbor_dist)
     end
 end
 
-local RAYCAST_MAX = 10
+local RAYCAST_MAX = 5
 ---@param pos Vector3
 ---@param dir Vector3
 ---@return Vector3?
 local function cast(pos, dir)
     local ray_dir = dir:copy():normalize()
-    for i = 0, RAYCAST_MAX, 0.25 do
+    for i = 0, RAYCAST_MAX, 2 do
         local ray_pos = pos + ray_dir * i
         if world.getBlockState(ray_pos):hasCollision() then
             return ray_pos
@@ -119,14 +119,9 @@ if raycast then
     end
 end
 
-local RAYS = 2
 function Boid:avoid()
-    local avoid = vec(0,0,0)
-    for i = 1, RAYS do
-        local hit = cast(self.pos, self.dir + rng.vec3() * 0.3)
-        avoid = avoid + (self.pos - hit):normalize()
-    end
-    return avoid / RAYS
+    local hit = cast(self.pos, self.dir + rng.vec3() * 0.3)
+    return (self.pos - hit):normalize()
 end
 
 ---@param target Vector3
@@ -157,20 +152,21 @@ function Boid:applyForces(neighbours, target)
     local seek_force = self:seek(target, 8)
     local avoid_force = self:avoid()
 
-    self.acc = self.acc + self.dir * 0.5
-    self.acc = self.acc + vec(0,0.1,0)
-    self.acc = self.acc + (separation_force * separation_scalar)
-    self.acc = self.acc + (alignment_force * alignment_scalar)
-    self.acc = self.acc + (cohesion_force * cohesion_scalar)
-    self.acc = self.acc + (seek_force * seek_scalar)
-    self.acc = self.acc + (avoid_force * avoid_scalar)
+    self.acc = self.acc
+    + self.dir * 0.5
+    + vec(0,0.1,0)
+    + (separation_force * separation_scalar)
+    + (alignment_force * alignment_scalar)
+    + (cohesion_force * cohesion_scalar)
+    + (seek_force * seek_scalar)
+    + (avoid_force * avoid_scalar)
 end
 
 local SPEED_LIMIT = 0.5
 function Boid:pleaseObeyAllTrafficRegulations()
-    local speed = self.vel:length()
-    if speed > SPEED_LIMIT then
-        self.vel = self.vel / speed * SPEED_LIMIT
+    local speed = self.vel:lengthSquared()
+    if speed > SPEED_LIMIT ^ 2 then
+        self.vel = self.vel / (speed ^ 0.5) * SPEED_LIMIT
     end
 end
 

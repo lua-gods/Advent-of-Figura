@@ -313,6 +313,9 @@ end
 function day:tick(skull)
     if not song then return end
     local redstone_level = world.getRedstonePower(skull.pos)
+    local torch = skull.renderer.parts[1].jukebox.torch
+    torch:rot(math.lerp(torch:getRot() or vec(0,0,0), vec(0, 0, math.map(redstone_level, 0, 15, 45, -45)), 0.4)):uvPixels(redstone_level > 0 and vec(0,-16) or vec(0,0))
+
     if redstone_level == 15 then
         return
     elseif redstone_level > 0 then
@@ -323,6 +326,7 @@ function day:tick(skull)
             return
         end
     end
+
     if skull.data.stress > 0 then
         skull.data.stress = skull.data.stress - 0.005
     end
