@@ -4,13 +4,15 @@ local Boid = require("libraries.Boid")
 ---@class BoidManager
 ---@field boids Boid[]
 ---@field lsh LSH
+---@field settings { max_speed: number, max_force: number, desired_separation: number, neighbor_dist: number, alignment_weight: number, cohesion_weight: number, separation_weight: number, seek_weight: number }
 ---@field target Vector3?
 local BoidManager = {}
 BoidManager.__index = BoidManager
 
-function BoidManager.new()
+function BoidManager.new(settings)
     local self = setmetatable({}, BoidManager)
     self.boids = {}
+    self.settings = settings
     self.lsh = LSH.new(50, 3)
     return self
 end
@@ -24,7 +26,7 @@ end
 ---@param pos Vector3
 ---@return Boid
 function BoidManager:newBoid(pos)
-    local boid = Boid.new()
+    local boid = Boid.new(self.settings)
     boid.pos = pos
     self:addBoid(boid)
     return boid

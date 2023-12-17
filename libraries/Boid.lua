@@ -7,10 +7,11 @@ local MAX_NEIGHBOURS = 20
 ---@field dir Vector3
 ---@field _pos Vector3
 ---@field _dir Vector3
+---@field settings { max_speed: number, max_force: number, desired_separation: number, neighbor_dist: number, alignment_weight: number, cohesion_weight: number, separation_weight: number, seek_weight: number }
 local Boid = {}
 Boid.__index = Boid
 
-function Boid.new()
+function Boid.new(settings)
     local self = setmetatable({}, Boid)
     self.pos = vec(0,0,0)
     self._pos = vec(0,0,0)
@@ -18,15 +19,15 @@ function Boid.new()
     self.acc = vec(0,0,0)
     self.dir = vec(0,0,0)
     self._dir = vec(0,0,0)
+    self.settings = settings
     return self
 end
 
 ---@param neighbours Boid[]
----@param desired_separation number
-function Boid:separate(neighbours, desired_separation)
+function Boid:separate(neighbours)
     local steer = vec(0, 0, 0)
     local count = 0
-    local sep_so = desired_separation ^ 2
+    local sep_so = self.settings.desired_separation ^ 2
     for i = 1, #neighbours do
         if count >= MAX_NEIGHBOURS then break end
         local other = neighbours[i]
@@ -47,9 +48,8 @@ function Boid:separate(neighbours, desired_separation)
 end
 
 ---@param neighbours Boid[]
----@param neighbor_dist number
-function Boid:align(neighbours, neighbor_dist)
-    neighbor_dist = neighbor_dist ^ 2
+function Boid:align(neighbours)
+    local neighbor_dist = self.settings.neighbor_dist ^ 2
     local sum = vec(0, 0, 0)
     local count = 0
     for i = 1, #neighbours do
@@ -70,11 +70,10 @@ function Boid:align(neighbours, neighbor_dist)
 end
 
 ---@param neighbours Boid[]
----@param neighbor_dist number
-function Boid:cohere(neighbours, neighbor_dist)
+function Boid:cohere(neighbours)
     local sum = vec(0, 0, 0)
     local count = 0
-    local sq_max = neighbor_dist ^ 2
+    local sq_max = self.settings.neighbor_dist ^ 2
     for i = 1, #neighbours do
         if count >= MAX_NEIGHBOURS then break end
         local other = neighbours[i]
@@ -138,35 +137,28 @@ function Boid:seek(target, when_over)
     return steer
 end
 
-local separation_scalar = 5.5
-local alignment_scalar = 3.5
-local cohesion_scalar = 4.0
-local seek_scalar = 0.3
-local avoid_scalar = 16.0
-
 ---@param target Vector3
 function Boid:applyForces(neighbours, target)
-    local separation_force = self:separate(neighbours, 3)
-    local alignment_force = self:align(neighbours, 6)
-    local cohesion_force = self:cohere(neighbours, 9)
+    local separation_force = self:separate(neighbours)
+    local alignment_force = self:align(neighbours)
+    local cohesion_force = self:cohere(neighbours)
     local seek_force = self:seek(target, 8)
     local avoid_force = self:avoid()
 
     self.acc = self.acc
-    + self.dir * 0.5
+    + self.dir * self.settings.max_speed * 0.5
     + vec(0,0.1,0)
-    + (separation_force * separation_scalar)
-    + (alignment_force * alignment_scalar)
-    + (cohesion_force * cohesion_scalar)
-    + (seek_force * seek_scalar)
-    + (avoid_force * avoid_scalar)
+    + (separation_force * self.settings.separation_weight)
+    + (alignment_force * self.settings.alignment_weight)
+    + (cohesion_force *  self.settings.cohesion_weight)
+    + (seek_force * self.settings.seek_weight)
+    + (avoid_force * 16)
 end
 
-local SPEED_LIMIT = 0.5
 function Boid:pleaseObeyAllTrafficRegulations()
     local speed = self.vel:lengthSquared()
-    if speed > SPEED_LIMIT ^ 2 then
-        self.vel = self.vel / (speed ^ 0.5) * SPEED_LIMIT
+    if speed > self.settings.max_speed ^ 2 then
+        self.vel = self.vel / (speed ^ 0.5) * self.settings.max_speed
     end
 end
 
