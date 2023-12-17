@@ -314,15 +314,20 @@ function day:tick(skull)
     if not song then return end
     local redstone_level = world.getRedstonePower(skull.pos)
     local torch = skull.renderer.parts[1].jukebox.torch
-    torch:rot(math.lerp(torch:getRot() or vec(0,0,0), vec(0, 0, math.map(redstone_level, 0, 15, 45, -45)), 0.4)):uvPixels(redstone_level > 0 and vec(0,-16) or vec(0,0))
-
+    local torch_rot = torch:getRot() or vec(0,0,0)
+    local torch_desired_rot = vec(redstone_level * 90, 0, math.map(redstone_level, 0, 15, 45, -45))
+    local diff = torch_desired_rot.z - torch_rot.z
+    torch:rot(math.lerp(torch_rot, torch_desired_rot, 0.5)):uvPixels(redstone_level > 0 and vec(0,-16) or vec(0,0))
+    if math.abs(diff) > 1 then
+        sounds["minecraft:entity.item_frame.break"]:pos(skull.render_pos):volume(0.5):pitch(0.5 - diff * 0.005 - torch_rot.z * 0.005):play()
+    end
     if redstone_level == 15 then
         return
     elseif redstone_level > 0 then
         if songs[redstone_level] and songs[redstone_level] ~= song then
             song = songs[redstone_level]
             self.setters[skull] = true
-            self.time = -2
+            self.time = -10
             return
         end
     end
@@ -332,6 +337,10 @@ function day:tick(skull)
     end
     if self.time < 0 then
         return
+    elseif self.time == 0 then
+        sounds["minecraft:entity.fishing_bobber.retrieve"]:pos(skull.render_pos):volume(2):pitch(0.5):play()
+        sounds["minecraft:entity.fishing_bobber.retrieve"]:pos(skull.render_pos):volume(2):pitch(0.6):play()
+        sounds["minecraft:entity.fishing_bobber.retrieve"]:pos(skull.render_pos):volume(2):pitch(0.7):play()
     end
     skull.renderer.parts[1]:setPos((skull.pos * 16):add((math.random() - 0.5) * skull.data.stress,0,(math.random() - 0.5) * skull.data.stress))
     skull.data.instrument = find_instrument(world.getBlockState(skull.pos:copy():sub(0,1,0)))
