@@ -32,7 +32,7 @@ local function parseString(string_representation)
         table.insert(notes[total_time], toMcPitch(note))
     end
 
-    notes.last = total_time + 20
+    notes.last = total_time + 80
 
     return notes
 end
@@ -317,11 +317,11 @@ function day:tick(skull)
     if not song then return end
     local redstone_level = world.getRedstonePower(skull.pos)
     local torch = skull.renderer.parts[1].jukebox.torch
-    local torch_rot = torch:getRot() or vec(0,0,0)
+    local torch_rot = torch:getRot()
     local torch_desired_rot = vec(redstone_level * 90, 0, math.map(redstone_level, 0, 15, 45, -45))
     local diff = torch_desired_rot.z - torch_rot.z
     torch:rot(math.lerp(torch_rot, torch_desired_rot, 0.5)):uvPixels(redstone_level > 0 and vec(0,-16) or vec(0,0))
-    if math.abs(diff) > 1 then
+    if math.abs(diff) > 1 and redstone_level ~= 0 then
         sounds["minecraft:entity.item_frame.break"]:pos(skull.render_pos):volume(0.5):pitch(0.5 - diff * 0.005 - torch_rot.z * 0.005):play()
     end
     if self.e then
@@ -350,7 +350,7 @@ function day:tick(skull)
 
     if self.time < 0 then
         return
-    elseif self.time == 0 then
+    elseif self.time == 0 and redstone_level ~= 0 then
         sounds["minecraft:entity.fishing_bobber.retrieve"]:pos(skull.render_pos):volume(2):pitch(0.5):play()
         sounds["minecraft:entity.fishing_bobber.retrieve"]:pos(skull.render_pos):volume(2):pitch(0.6):play()
         sounds["minecraft:entity.fishing_bobber.retrieve"]:pos(skull.render_pos):volume(2):pitch(0.7):play()
