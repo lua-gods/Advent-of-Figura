@@ -37,4 +37,15 @@ function rng.of(...)
     return type((...)) ~= "table" and rng.of({...}) or (...)[i], i
 end
 
+---@param val number|Vector3|string
+function rng.seed(val)
+    local seed
+        =  type(val) == "number" and val
+        or type(val) == "Vector3" and val.x * 73856093 + val.y * 19349669 + val.z * 83492791
+        or type(val) == "string" and string.byte(val, 1)
+        or error("Invalid seed type")
+    math.randomseed(seed)
+    math.random(); math.random(); math.random()
+end
+
 _G.rng = rng
