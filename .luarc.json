@@ -323,7 +323,9 @@
     "libraryFiles": "Opened",
 
     // The docs handle global variables themselves.
-    "globals": [],
+    "globals": [
+            "debug_enabled"
+        ],
 
     // All local variables must be checked (except for the empty variable "_")
     "unusedLocalExclude": []

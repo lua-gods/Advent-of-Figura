@@ -77,3 +77,11 @@ function day:render(skull, delta)
     skull.data.task:rot(utils.dirToAngle(((skull.pos + vec(0.5,1.5,0.5)) - client:getCameraPos()):normalize()) + vec(0, skull.rot, 0)):text(wrapLines(stats(), nil, "§r§7 |"))
     skull.data.task2:rot(utils.dirToAngle(((skull.pos + vec(0.5,1.5,0.5)) - client:getCameraPos()):normalize()) + vec(0, skull.rot, 0)):text(wrapLines(skulls(), "§r§7 "))
 end
+
+function day:globalInit()
+    _G.debug_enabled = true
+end
+
+function day:globalExit()
+    _G.debug_enabled = false
+end

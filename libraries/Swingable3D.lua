@@ -14,6 +14,7 @@ local SIM_SPEED = 5
 ---@field offset number
 ---@field velocity Vector3
 ---@field last_sound number
+---@field colliding_for number
 local Swingable3D = {}
 Swingable3D.__index = Swingable3D
 
@@ -31,6 +32,7 @@ function Swingable3D.new(part, pos)
     self.spring = 0
     self.offset = 0
     self.last_sound = TIME
+    self.colliding_for = 0
     return self
 end
 
@@ -51,7 +53,7 @@ local function drawBounds(min, max, lifetime)
 end
 
 function Swingable3D:impactSound(play_bulk)
-    if (TIME - self.last_sound > 1) then
+    if (TIME - self.last_sound > 1 or self.colliding_for < 4) then
         sounds["block.amethyst_block.place"]:pos(self:getPos()):pitch(rng.float(2.5,4)):play()
         self.last_sound = TIME
     elseif play_bulk then
@@ -61,8 +63,10 @@ function Swingable3D:impactSound(play_bulk)
 end
 
 function Swingable3D:tick(other_swingables)
-    local min, max = self:getBounds()
-    drawBounds(min, max, 1)
+    if debug_enabled then
+        local min, max = self:getBounds()
+        drawBounds(min, max, 1)
+    end
 
     local dt = 0.05
 
@@ -87,10 +91,18 @@ function Swingable3D:tick(other_swingables)
         self:impactSound(true)
 
         self._pos = self.pos:copy()
-        self.pos = self.pos + vel * dt
+
+        self.colliding_for = self.colliding_for + 1
+        if self.colliding_for > 2 then
+            self.pos = self.pos - vel * dt * self.colliding_for
+        else
+            self.pos = self.pos + vel * dt
+        end
     else
         self._pos = self.pos:copy()
         self.pos = self.pos + velocity * dt
+
+        self.colliding_for = 0
     end
 
     local direction = self.pos - self.base
@@ -138,7 +150,9 @@ function Swingable3D:isColliding(other_swingables)
                         local box = boxes[i]
                         local box_min = box[1] + block_pos
                         local box_max = box[2] + block_pos
-                        drawBounds(box_min, box_max, 10)
+                        if debug_enabled then
+                            drawBounds(box_min, box_max, 10)
+                        end
                         if not (box_max.x <= min.x or max.x <= box_min.x or
                                 box_max.y <= min.y or max.y <= box_min.y or
                                 box_max.z <= min.z or max.z <= box_min.z) then
