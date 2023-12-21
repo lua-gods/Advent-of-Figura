@@ -30,8 +30,9 @@ function rng.step(from, to, step)
     return math.floor((math.random() * (to - from) + from) / step) * step
 end
 
----@param ... table|...
----@return any val, integer index
+---@generic T
+---@param ... T[]
+---@return T, integer index
 function rng.of(...)
     local i = rng.int(#(...))
     return type((...)) ~= "table" and rng.of({...}) or (...)[i], i

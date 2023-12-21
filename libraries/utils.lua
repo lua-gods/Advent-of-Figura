@@ -109,13 +109,36 @@ function utils.split(str, on)
     return result
 end
 
----@param ... any|any[]
----@return table<any, boolean>
+---@generic T
+---@vararg T[]
+---@return { [T]: boolean }
 function utils.set(...)
     local result = {}
     local args = type(...) == "table" and ... or {...}
     for i = 1, #args do
         result[args[i]] = true
+    end
+    return result
+end
+
+---@generic V
+---@param t table<any, V>
+---@return V[]
+function utils.list(t)
+    local result = {}
+    for _, v in next, t do
+        result[#result+1] = v
+    end
+    return result
+end
+
+---@generic K
+---@param t table<K, any>
+---@return K[]
+function utils.keys(t)
+    local result = {}
+    for k, _ in next, t do
+        result[#result+1] = k
     end
     return result
 end
