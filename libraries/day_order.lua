@@ -16,11 +16,11 @@ return {    "snowman", -- 4P5
             "dvd", -- Deni
             "boids", -- 4P5
             "jukebox", -- 4P5 & GN (updated)
-            "bubbles", -- 4P5
             "shelfElf", -- Chloe
+            "fireflies", -- 4P5
+            "bubbles", -- 4P5
             "baubles", -- 4P5
-            nil,
-            nil,
+            "carols",
             nil,
             "badge" -- 4P5
 }
