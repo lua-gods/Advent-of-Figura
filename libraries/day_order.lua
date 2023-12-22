@@ -21,6 +21,7 @@ return {    "snowman", -- 4P5
             "bubbles", -- 4P5
             "baubles", -- 4P5
             "carols",
+            "present",
             nil,
             "badge" -- 4P5
 }
