@@ -7,20 +7,22 @@ local cat = models.cat.Cat
 local worn_part = day:addWornPart(cat)
 local item_part = day:setItemPart(cat)
 
-local idle = Anim.new(models.cat, "idle")
 
-idle:play()
 
 
 --control variables
-local eepyTime = 60 --time before falling asleep(seconds)
+local eepyTime = 3 --time before falling asleep(seconds)
 
 
 ---@param skull Skull
 function day:init(skull)
-    skull.data.cat = skull:addPart(cat)
+    --skull.data.cat = skull:addPart(cat)
     skull.data.sleeping = false
     skull.data.timeAwake = 0
+    local copy = skull:addPart(models.cat)
+    skull.data.idle = Anim.new(copy, "idle")
+    skull.data.sleep = Anim.new(copy, "sleep")
+    skull.data.idle:play()
 end
 
 ---@param skull Skull
@@ -29,9 +31,12 @@ function day:tick(skull)
    skull.data.timeAwake = skull.data.timeAwake + 1
    if skull.data.timeAwake > eepyTime*20 then
         skull.data.sleeping = true
+        skull.data.idle:stop()
+        skull.data.sleep:play()
    else
         skull.data.sleeping = false
    end
+
 end
 
 ---@param skull Skull
