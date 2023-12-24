@@ -19,17 +19,17 @@ for i = 1, #anims do
 end
 
 ---@type table<string, table>
-local anims = {}
+local structured_anims = {}
 local function recurse(nbt, path)
     for i = 1, #nbt do
         local child = nbt[i]
         if child.anim then
             for j = 1, #child.anim do
                 local anim = child.anim[j]
-                anims[anim.id] = anims[anim.id] or {
+                structured_anims[anim.id] = structured_anims[anim.id] or {
                     len = anim.len,
                 }
-                anims[anim.id][#anims[anim.id] + 1] = {
+                structured_anims[anim.id][#structured_anims[anim.id] + 1] = {
                     path = path .. "." .. child.name,
                     data = anim.data,
                 }
@@ -105,6 +105,7 @@ end
 ---@field private start_time number
 ---@field mode Animation.loopMode
 ---@field playing boolean
+---@field time number
 ---@field id string
 local Anim = {}
 Anim.__index = Anim
@@ -115,10 +116,11 @@ Anim.__index = Anim
 function Anim.new(base_part, name)
     local self = setmetatable({}, Anim)
     self.base_part = base_part
-    self.structured_keyframes = getKeyframes(anims[anim_map[name]], base_part)
+    self.structured_keyframes = getKeyframes(structured_anims[anim_map[name]], base_part)
     self.mode = anim_modes[name]
     self.length = anim_lengths[name]
     self.start_time = client.getSystemTime() / 1000
+    self.time = 0
     self.playing = false
     self.id = tostring(math.random())
     return self
@@ -183,6 +185,8 @@ function Anim:render()
             end
         end
     end
+
+    self.time = time
 end
 
 ---@param p0 number
@@ -279,8 +283,13 @@ function Anim:stop()
     if not self.playing then return end
     self.playing = false
 
-    events.WORLD_TICK:remove("anim_tick_" .. self.id)
     events.WORLD_RENDER:remove("anim_render_" .. self.id)
+
+    for part, transforms in next, self.structured_keyframes do
+        for transform_type in next, transforms do
+            part[transform_type == "scl" and "scale" or transform_type](part)
+        end
+    end
 end
 
 return Anim
