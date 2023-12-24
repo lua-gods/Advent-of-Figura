@@ -22,6 +22,7 @@ function day:init(skull)
     local copy = skull:addPart(models.cat)
     skull.data.idle = Anim.new(copy, "idle")
     skull.data.sleep = Anim.new(copy, "sleep")
+    skull.data.fallAsleep = Anim.new(copy, "fallAsleep")
     skull.data.idle:play()
 end
 
@@ -32,11 +33,17 @@ function day:tick(skull)
    if skull.data.timeAwake > eepyTime*20 then
         skull.data.sleeping = true
         skull.data.idle:stop()
-        skull.data.sleep:play()
+        skull.data.fallAsleep:play()
    else
         skull.data.sleeping = false
    end
-
+   if skull.data.sleeping then
+    if skull.data.fallAsleep.time >= .66 then
+        skull.data.fallAsleep:stop()
+        skull.data.sleep:play()
+    end
+   end
+   
 end
 
 ---@param skull Skull
