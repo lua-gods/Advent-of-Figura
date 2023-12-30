@@ -15,7 +15,7 @@ local anim_lengths = {}
 for i = 1, #anims do
     local anim = anims[i]
     anim_lengths[anim.name] = anim.len
-    anim_modes[anim.name] = anim.loop or "once"
+    anim_modes[anim.name] = anim.loop and anim.loop:upper() or "ONCE"
 end
 
 ---@type table<string, table>
@@ -119,7 +119,7 @@ function Anim.new(base_part, name)
     self.structured_keyframes = getKeyframes(structured_anims[anim_map[name]], base_part)
     self.mode = anim_modes[name]
     self.length = anim_lengths[name]
-    self.start_time = client.getSystemTime() / 1000
+    self.start_time = 0
     self.time = 0
     self.playing = false
     self.id = tostring(math.random())
@@ -129,6 +129,8 @@ end
 function Anim:play()
     if self.playing then return end
     self.playing = true
+
+    self.start_time = client.getSystemTime() / 1000
 
     events.WORLD_RENDER:register(function()
         self:render()
@@ -163,13 +165,13 @@ end
 function Anim:render()
     local time = (client.getSystemTime() / 1000) - self.start_time
 
-    if self.mode == "loop" then
+    if self.mode == "LOOP" then
         time = time % self.length
-    elseif self.mode == "hold" then
+    elseif self.mode == "HOLD" then
         if time > self.length then
             time = self.length
         end
-    elseif self.mode == "once" then
+    elseif self.mode == "ONCE" then
         if time > self.length then
             self:stop()
             return
