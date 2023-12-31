@@ -11,7 +11,7 @@ end
 
 ---@param skull Skull
 function day:tick(skull)
-    local pos = skull.pos + vec(0.5,0.5,0.5) + vec(0,0.025,0) - vec(math.sin((TIME + 2)/10),0,math.cos((TIME + 2)/10)) * 0.2
+    local pos = skull.pos + vec(0.5,0.5,0.5) + vec(0,0.025,0) - vec(math.sin((TIME + 2)/10),0,math.cos((TIME + 2)/10)) * 0.45
     if math.random() > 0.6 then
         Bubble.new(pos, vec(0,0.025,0) - vec(math.sin(TIME/10),0,math.cos(TIME/10)) * 0.12)
         for _ = 1, 3 do
@@ -21,7 +21,7 @@ function day:tick(skull)
     end
     if skull.data.overdrive > 0 then
         for i = 1, 5 do
-            Bubble.new(pos, vec(0,0.025,0) + rng.vec3():normalize() * 0.15 + vec(math.sin(TIME/10),0,math.cos(TIME/10)) * 0.1)
+            Bubble.new(pos, vec(0,0.035,0) + rng.vec3():normalize() * 0.15 - vec(math.sin((TIME + 2)/10),0,math.cos((TIME + 2)/10)) * 0.45)
             for _ = 1, 2 do
                 particles["bubble_pop"]:pos(pos):scale(1.2):spawn()
                 particles["splash"]:pos(pos + rng.vec3() * 0.1):scale(0.5):spawn()

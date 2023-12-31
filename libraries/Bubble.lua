@@ -41,7 +41,9 @@ function Bubble:pop()
     bubbles[self.id] = nil
 end
 
-function events.TICK()
+function events.WORLD_TICK()
+    if not next(bubbles) then return end
+
     local boxes = {}
     for _, player in pairs(world.getPlayers()) do
         local hitbox = player:getBoundingBox()
