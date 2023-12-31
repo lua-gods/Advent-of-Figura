@@ -58,6 +58,8 @@ function day:init(skull)
             :translate(0,20+math.random() * 5 + (s*s * 8),0)
             leaf:setMatrix(mat)
             skull.data.leaves[#skull.data.leaves+1] = leaf
+            local uv_mat = matrices.mat3():scale(leaf_size,leaf_size)
+            leaf:setUVMatrix(uv_mat)
         end
     end
 
