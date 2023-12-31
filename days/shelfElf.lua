@@ -5,7 +5,6 @@ day:setItemPart(models.shelfElf)
 
 local MAX_CEILING_HEIGHT = 5
 local DENY_LIST = { "head", "door" }
-local JUMPSCARE_DISTANCE_THRESHOLD = 3
 
 local function checkCeiling(clientPos)
   for k = 1, MAX_CEILING_HEIGHT do
@@ -24,21 +23,21 @@ end
 
 function day:init(skull)
   skull.data.hasJumpscared = true
-  skull.data.isntFirstTick = false
+  skull.data.isFirstTick = true
   skull.data.model = skull:addPart(models.shelfElf)
-  skull.data.pos = skull.pos + vec(0.5, 0.5, 0.5)
+  skull.data.pos = skull.pos
   skull.data.rot = vec(0, skull.rot, 0)
 end
 
 function day:tick(skull)
-  if not skull.data.isntFirstTick then
-    skull.data.isntFirstTick = true
+  if skull.data.isFirstTick then
+    skull.data.isFirstTick = false
     return
   end
 
   local clientPos = viewer:getPos():add(0,viewer:getEyeHeight(),0)
 
-  if not isOnScreen(skull.data.pos) then
+  if not isOnScreen(skull.data.pos + vec(0.5, 0, 0.5)) then
     local rot = utils.dirToAngle(clientPos - skull.data.pos)
     skull.data.rot = vec(0, rot.y + 180 + skull.rot, 0)
     skull.data.model.ROOT:setRot(skull.data.rot)
@@ -46,7 +45,7 @@ function day:tick(skull)
 
     if TIME % 99 == 0 then
       local likelyCeiling = checkCeiling(clientPos)
-      local randomPos = vec(skull.data.pos.x + math.random(-4, 4), math.floor(clientPos.y) + likelyCeiling, skull.data.pos.z + math.random(-4, 4))
+      local randomPos = vec(skull.pos.x + math.random(-4, 4), math.floor(clientPos.y) + likelyCeiling, skull.pos.z + math.random(-4, 4))
       for k = 0, 5 + likelyCeiling do
         local pos = randomPos - vec(0, k, 0)
         local blockstate = world.getBlockState(pos)
@@ -62,24 +61,23 @@ function day:tick(skull)
           end
         end
         if (blockstate:hasCollision() and not (blockstate.id == "minecraft:light" or isDenyListed)) and (not aboveBlockstate:hasCollision() or aboveBlockstate.id == "minecraft:light" or isDenyListedAbove) then
-          local finalPos = pos - vec(0.5, 0, 0.5)
-          if not isOnScreen(finalPos) then
+          if not isOnScreen(pos  + vec(0.5, 0, 0.5)) then
             skull.data.hasJumpscared = false
             local blockHeight = 0
             if blockstate:getCollisionShape()[1] then
               blockHeight = blockstate:getCollisionShape()[1][2].y
             end
-            skull.data.pos = finalPos + vec(0, blockHeight, 0)
+            skull.data.pos = pos + vec(0, blockHeight, 0)
             skull.data.model:setPos(skull.data.pos * 16)
           end
         end
       end
     end
   else
-    local horizontalDistance = clientPos.x_z:sub(skull.data.pos.x_z):lengthSquared()
-    if (horizontalDistance + (clientPos.y - skull.data.pos.y) ^ 2) < JUMPSCARE_DISTANCE_THRESHOLD ^ 2 and not skull.data.hasJumpscared then
-      sounds:playSound("minecraft:ambient.cave", clientPos)
-      skull.data.hasJumpscared = true
+    local horosontalDistance = math.sqrt((clientPos.x-skull.data.pos.x)^2 + (clientPos.z-skull.data.pos.z)^2)
+    if (horosontalDistance^2 + (clientPos.y-skull.data.pos.y)^2) < 9 and (not skull.data.hasJumpscared) then
+      sounds:playSound("minecraft:ambient.cave",clientPos)
     end
-  end
+      skull.data.hasJumpscared = true
+      end
 end
