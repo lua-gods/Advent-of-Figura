@@ -38,7 +38,7 @@ function day:tick(skull)
   local clientPos = viewer:getPos():add(0,viewer:getEyeHeight(),0)
 
   if not isOnScreen(skull.data.pos + vec(0.5, 0, 0.5)) then
-    local rot = utils.dirToAngle(clientPos - skull.data.pos)
+    local rot = utils.dirToAngle(clientPos - (skull.data.pos + vec(0.5, 0, 0.5)))
     skull.data.rot = vec(0, rot.y + 180 + skull.rot, 0)
     skull.data.model.ROOT:setRot(skull.data.rot)
     skull.data.model.ROOT.Elf.Head:setRot(-rot.x, 0, 0)
