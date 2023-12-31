@@ -96,8 +96,3 @@ function day:render(skull, delta)
     skull.data.door_wreath.door:setOpacity(math.sin((TIME+delta)/5)/4+0.75)
   end
 end
-
----@param skull Skull
-function day:exit(skull)
-
-end

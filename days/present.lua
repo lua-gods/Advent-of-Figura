@@ -133,38 +133,6 @@ end
 function day:punch(skull,puncher)
     skull.data.effect(skull)
     rng.seed(skull.pos + vec(0,0,skull.data.salt))
-    -- local old_effect = skull.data.effect
-    -- if math.random() > 0.9 then
-    --     repeat
-    --         skull.data.effect = rng.of(effects)
-    --     until skull.data.effect ~= old_effect
-    -- end
     skull.data.salt = skull.data.salt + 1
     skull.debugger:expose("salt", skull.data.salt)
-end
-
----@param skull Skull
----@param delta number
-function day:render(skull, delta)
-
-end
-
----@param skull Skull
-function day:exit(skull)
-
-end
-
----@param skulls Skull[]
-function day:globalTick(skulls)
-
-end
-
----@param skulls Skull[]
-function day:globalInit(skulls)
-
-end
-
----@param skulls Skull[]
-function day:globalExit(skulls)
-
 end

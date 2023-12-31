@@ -148,16 +148,6 @@ function day:exit(skull)
 end
 
 ---@param skulls Skull[]
-function day:globalInit(skulls)
-
-end
-
----@param skulls Skull[]
-function day:globalTick(skulls)
-    manager:tick()
-end
-
----@param skulls Skull[]
 ---@param delta number
 function day:globalRender(skulls, delta)
     local boids = manager.boids
@@ -166,30 +156,4 @@ function day:globalRender(skulls, delta)
         boid_models[boid]:pos(boid:getPos(delta) * 16 + vec(-8,0,-8))
         boid_models[boid]:rot(boid:getRot(delta))
     end
-end
-
----@param skulls Skull[]
-function day:globalExit(skulls)
-
-end
-
----@param entity Entity
-function day:wornInit(entity)
-
-end
-
----@param entity Entity
-function day:wornTick(entity)
-
-end
-
----@param entity Entity
----@param delta number
-function day:wornRender(entity, delta)
-
-end
-
----@param entity Entity
-function day:wornExit(entity)
-
 end

@@ -98,17 +98,6 @@ function day:tick(skull)
 end
 
 ---@param skull Skull
-function day:punch(skull)
-
-end
-
----@param skull Skull
----@param delta number
-function day:render(skull, delta)
-
-end
-
----@param skull Skull
 function day:exit(skull)
     for i = 1, #skull.data.balls do
         skull.data.balls[i]:remove()

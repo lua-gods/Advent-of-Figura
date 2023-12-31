@@ -44,51 +44,9 @@ function day:render(skull, delta)
     :pos((skull.render_pos + vec(0,math.sin((TIME + delta) / 15) * 0.05 + 0.1,0)) * 16)
 end
 
----@param skull Skull
-function day:exit(skull)
-
-end
-
----@param skulls Skull[]
-function day:globalTick(skulls)
-
-end
-
----@param skulls Skull[]
----@param delta number
-function day:globalRender(skulls, delta)
-
-end
-
----@param skulls Skull[]
-function day:globalInit(skulls)
-
-end
-
----@param skulls Skull[]
-function day:globalExit(skulls)
-
-end
-
----@param entity Entity
-function day:wornInit(entity)
-
-end
-
 ---@param entity Entity
 function day:wornTick(entity)
     if math.random() > 0 then
         Bubble.new(entity:getPos():add(0, entity:getBoundingBox().y + 0.1, 0) + entity:getLookDir() * 0.5, entity:getLookDir() * 0.5)
     end
-end
-
----@param entity Entity
----@param delta number
-function day:wornRender(entity, delta)
-
-end
-
----@param entity Entity
-function day:wornExit(entity)
-
 end

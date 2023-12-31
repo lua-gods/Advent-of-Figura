@@ -4,6 +4,7 @@ local deepCopy = require("libraries.deep_copy")
 ---@field name string
 ---@field item_part ModelPart?
 ---@field worn_parts ModelPart[]
+---@field active boolean
 local Day = {}
 Day.__index = Day
 
@@ -52,7 +53,6 @@ function Day:wornTick(entity) end
 
 ---@param entity Entity
 ---@param delta number
----@return ModelPart[]? to_show
 function Day:wornRender(entity, delta) end
 
 ---@param entity Entity

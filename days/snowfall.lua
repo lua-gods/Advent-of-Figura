@@ -186,20 +186,9 @@ function day:init(skull)
 end
 
 ---@param skull Skull
-function day:tick(skull)
-
-end
-
----@param skull Skull
 ---@param puncher Player
 function day:punch(skull,puncher)
   reloadSnow(skull)
-end
-
----@param skull Skull
----@param delta number
-function day:render(skull, delta)
-
 end
 
 ---@param skull Skull

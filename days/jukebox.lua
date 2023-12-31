@@ -434,16 +434,6 @@ function day:render(skull, delta)
     end
 end
 
-function day:punch(skull, puncher)
-    -- if puncher:getHeldItem().id:find("head") then return end
-    -- selected_song = selected_song + 1
-    -- if selected_song > #songs then
-    --     selected_song = 1
-    -- end
-    -- song = songs[selected_song]
-    -- self.time = 0
-end
-
 ---@param skull Skull
 function day:exit(skull)
     for i = #skull.data.particles, 1, -1 do
