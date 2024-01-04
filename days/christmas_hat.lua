@@ -1,6 +1,7 @@
 local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("christmas_hat")
 
+day:setItemPart(models.christmas_hat.hat):pos(0,2.5,0)
 
 local hatModel = models.christmas_hat.hat
 

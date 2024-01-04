@@ -2,6 +2,8 @@ local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("bubbles")
 local Bubble = require("libraries.Bubble")
 
+day:setItemPart(models.bubbles.Puff)
+
 ---@param skull Skull
 function day:init(skull)
     skull.data.overdrive = 0
@@ -46,7 +48,7 @@ end
 
 ---@param entity Entity
 function day:wornTick(entity)
-    if math.random() > 0 then
+    if math.random() > 0.3 then
         Bubble.new(entity:getPos():add(0, entity:getBoundingBox().y + 0.1, 0) + entity:getLookDir() * 0.5, entity:getLookDir() * 0.5)
     end
 end

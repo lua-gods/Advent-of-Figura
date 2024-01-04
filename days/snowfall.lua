@@ -7,6 +7,8 @@ local groundSnowDatabase = {}
 local fallingSnowDatabase = {}
 local clientPos = nil
 
+day:setItemPart(models.snowfall.templates.snow):scale(0.6):pos(0,5,0)
+
 function day:globalInit(skull)
   clientPos = client.getViewer():getPos()
   renderer:addPart(models.customRain)

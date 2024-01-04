@@ -4,6 +4,8 @@ local tween = require("libraries.GNTweenLib")
 
 local day = Calendar:newDay("snowman")
 
+day:setItemPart(models.snowman.Top.basic)
+
 local variants = {
     top = models.snowman.Top:getChildren(),
     middle = models.snowman.Middle:getChildren(),

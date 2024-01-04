@@ -2,7 +2,7 @@ local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("cat")
 local Anim = require("libraries.Anim")
 
-
+day:setItemPart(models.cat.Cat.whole)
 
 
 

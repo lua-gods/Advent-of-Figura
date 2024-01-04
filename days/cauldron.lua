@@ -1,6 +1,7 @@
 local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("cauldron")
 
+day:setItemPart(models:newPart("cauldron_item")):newBlock("item"):block("cauldron"):scale(0.55):pos(-9,-3,0)
 
 local function transform(a, b, ...)
     if b == nil then

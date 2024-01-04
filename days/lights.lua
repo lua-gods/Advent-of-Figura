@@ -6,6 +6,8 @@ local tween = require("libraries.GNTweenLib")
 ---@field manager SplineManager
 local day = Calendar:newDay("lights")
 
+day:setItemPart(models.lights.Light):pos(-5,-2,5):rot(0,180,0):scale(2):color(0,0.1,0.8)
+
 local manager = SplineManager.new(models.lights.Light:getChildren())
 local toggle = false
 local colors = {vec(0.8,0,0),vec(0,0.1,0.8),vec(0.95,0.65,0),vec(0,0.6,0.2),}

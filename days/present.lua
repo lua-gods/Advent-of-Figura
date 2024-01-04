@@ -106,6 +106,8 @@ local effects = {
     end,
 }
 
+day:setItemPart(models.presents.Present):secondaryRenderType("GLINT2")
+
 local model_variants = models.presents.Present:getChildren()
 
 ---@param skull Skull

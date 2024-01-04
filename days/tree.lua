@@ -1,6 +1,8 @@
 local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("tree")
 
+day:setItemPart(models.tree.log)
+
 local skullManager = require("libraries.SkullManager")
 
 local MAX_TREE_SIZE = 64

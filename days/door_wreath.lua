@@ -1,6 +1,8 @@
 local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("door_wreath")
 
+day:setItemPart(models.door_wreath):rot(0,-22.5,0):pos(-1,1,0):scale(0.75)
+
 function toggleDoorHoligram(skull,toggle)
   if toggle then
     skull.data.door_wreath.door:setVisible(true)

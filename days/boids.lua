@@ -47,6 +47,8 @@ end
 local day = Calendar:newDay("boids")
 local boid_models = {}
 
+day:setItemPart(models.boids.boid):pos(-5,3,5):rot(0,180,0):scale(0.5)
+
 local manager = BoidManager.new({
     max_speed = 0.5,
     desired_separation = 3,
@@ -156,4 +158,9 @@ function day:globalRender(skulls, delta)
         boid_models[boid]:pos(boid:getPos(delta) * 16 + vec(-8,0,-8))
         boid_models[boid]:rot(boid:getRot(delta))
     end
+end
+
+---@param skulls Skull[]
+function day:globalTick(skulls)
+    manager:tick()
 end

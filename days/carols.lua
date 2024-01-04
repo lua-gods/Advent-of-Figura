@@ -1,6 +1,8 @@
 local Calendar = require("libraries.Calendar")
 local day = Calendar:newDay("carols")
 
+day:setItemPart(models.model.item):setColor(1,1,0)
+
 local function build(text, order)
     local words = utils.split(text, ' ')
     local chain = {}
